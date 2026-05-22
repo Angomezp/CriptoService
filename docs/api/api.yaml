@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: Análisis de Criptomonedas - API
+  description: API REST para la plataforma de análisis de criptomonedas - Grupo 9
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Autenticación
+    description: Endpoints de registro, login y verificación MFA
+
+paths:
+
+  /auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar un nuevo usuario
+      description: Crea un nuevo usuario, hashea la contraseña con bcrypt, cifra los datos personales con AES-256, genera el secreto TOTP y devuelve el QR para configurar Google Authenticator.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - correo
+                - password
+              properties:
+                nombre:
+                  type: string
+                  example: Angel Gómez
+                correo:
+                  type: string
+                  format: email
+                  example: angel@gmail.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: MiPassword123
+      responses:
+        '201':
+          description: Usuario registrado exitosamente. Se devuelve el QR para escanear con Google Authenticator.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Usuario registrado exitosamente
+                  qr_code:
+                    type: string
+                    description: Imagen del QR en formato base64 para escanear con Google Authenticator
+                    example: data:image/png;base64,iVBORw0KGgo...
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                codigo: 400
+                mensaje: El correo ya está registrado
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Verifica el correo y la contraseña del usuario con bcrypt. Si son correctos y el usuario tiene MFA activado, solicita el código TOTP. Si no tiene MFA activado, devuelve el JWT directamente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - correo
+                - password
+              properties:
+                correo:
+                  type: string
+                  format: email
+                  example: angel@gmail.com
+                password:
+                  type: string
+                  format: password
+                  example: MiPassword123
+      responses:
+        '200':
+          description: Contraseña correcta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Contraseña correcta, ingresa el código MFA
+                  mfa_requerido:
+                    type: boolean
+                    example: true
+        '200 (sin MFA)':
+          description: Login exitoso sin MFA, se devuelve el JWT directamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Correo o contraseña incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                codigo: 401
+                mensaje: Credenciales inválidas
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/verify-mfa:
+    post:
+      tags:
+        - Autenticación
+      summary: Verificar código MFA
+      description: Recibe el código de 6 dígitos generado por Google Authenticator, lo verifica contra el secreto TOTP almacenado en la base de datos y si es correcto genera y devuelve el JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - correo
+                - codigo_totp
+              properties:
+                correo:
+                  type: string
+                  format: email
+                  example: angel@gmail.com
+                codigo_totp:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "482910"
+      responses:
+        '200':
+          description: Código MFA válido, login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Código MFA inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                codigo: 401
+                mensaje: Código MFA inválido o expirado
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/confirm-mfa:
+    post:
+      tags:
+        - Autenticación
+      summary: Confirmar activación de MFA
+      description: Después del registro, el usuario escanea el QR y confirma que lo hizo ingresando su primer código válido. Esto activa el MFA (mfa_enabled = true) en la base de datos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - correo
+                - codigo_totp
+              properties:
+                correo:
+                  type: string
+                  format: email
+                  example: angel@gmail.com
+                codigo_totp:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "482910"
+      responses:
+        '200':
+          description: MFA activado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: MFA activado correctamente
+        '401':
+          description: Código inválido, MFA no activado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                codigo: 401
+                mensaje: Código inválido, escanea el QR nuevamente
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Login exitoso
+        token:
+          type: string
+          description: JWT para usar en peticiones posteriores
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          example: 400
+        mensaje:
+          type: string
+          example: Descripción del error
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
