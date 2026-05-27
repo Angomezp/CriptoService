@@ -79,7 +79,9 @@ proyecto_cripto/
 │   └── totp_handler          → generación del secret, QR y verificación TOTP
 │
 ├── config/
-│   └── database              → configuración de conexión a PostgreSQL
+│   ├── database              → configuración de conexión a PostgreSQL
+│   ├── env.ts
+│   └── router.ts
 │
 └── main                      → punto de entrada, arranca el servidor Express
 ```
