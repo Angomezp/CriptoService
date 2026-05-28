@@ -117,13 +117,15 @@ La capa de seguridad es transversal, es decir, no pertenece a un solo dominio si
 ```
 1. Usuario envía correo + contraseña → Auth Controller
 2. Auth Controller delega → Auth Service
-3. Auth Service verifica contraseña con bcrypt (hashing)
-4. Si es correcta, Auth Service solicita código TOTP al usuario
-5. Usuario ingresa código desde Google Authenticator
-6. Auth Service recupera totp_secret cifrado de la BD (user_repository)
-7. Auth Service descifra el secret (encryption) y verifica el código (totp_handler)
-8. Si es correcto, Auth Service genera JWT (jwt_handler)
-9. JWT es devuelto al cliente
+3. Auth Service verifica credenciales con bcrypt (hashing)
+4. Si las credenciales son correctas:
+   - Si el usuario tiene MFA activo: El servidor entrega un token temporal de sesión y solicita el código del MFA.
+   - Si el usuario NO tiene MFA: El servidor entrega el token definitivo y finaliza el proceso.
+5. (Para MFA activo) Usuario envía el código MFA + el token temporal → Auth Controller (POST /auth/verify-mfa)
+6. Auth Controller valida el token temporal y obtiene la identidad del usuario
+7. Auth Service recupera el secret cifrado de la BD (user_repository)
+8. Auth Service descifra el secret (encryption) y verifica el código (totp_handler)
+9. Si el código es correcto, Auth Service genera el token definitivo y se devuelve al cliente
 ```
 
 ## 5. Flujo de predicciones
