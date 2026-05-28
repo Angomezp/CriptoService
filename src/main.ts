@@ -14,8 +14,6 @@ AppDataSource.initialize()
     console.error("DB connection error:", error);
   });
 
-
-
 const app = express();
 
 app.use(cors());

@@ -1,7 +1,7 @@
 import { AppDataSource } from "./datasource.js";
 import { DataSource } from "typeorm";
 
-class Database {
+export class Database {
     private static instance: DataSource | null = null;
 
     private constructor() {}
