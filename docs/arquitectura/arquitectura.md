@@ -52,36 +52,41 @@ Esta organización garantiza que cada capa tenga una única responsabilidad y pu
 proyecto_cripto/
 │
 ├── controllers/
-│   ├── auth_controller       → endpoints /register, /login, /verify-mfa
-│   ├── crypto_controller     → endpoints /prices, /history
-│   ├── portfolio_controller  → endpoints /portfolio, /investment
-│   └── prediction_controller → endpoint /prediction
+│   ├── auth.controller       → endpoints /register, /login, /verify-mfa
+│   ├── crypto.controller     → endpoints /prices, /history
+│   ├── portfolio.controller  → endpoints /portfolio, /investment
+│   └── prediction.controller → endpoint /prediction
 │
 ├── services/
-│   ├── auth_service          → lógica de registro y login
-│   ├── crypto_service        → consulta a API externa de precios (CoinGecko)
-│   ├── portfolio_service     → lógica de portafolio e inversiones
-│   └── prediction_service    → recibe la petición y consulta al servicio Python ML por HTTP
+│   ├── auth.service          → lógica de registro y login
+│   ├── crypto.service        → consulta a API externa de precios (CoinGecko)
+│   ├── portfolio.service     → lógica de portafolio e inversiones
+│   └── prediction.service    → recibe la petición y consulta al servicio Python ML por HTTP
 │
 ├── repositories/
-│   ├── user_repository       → operaciones sobre tabla usuario
-│   └── portfolio_repository  → operaciones sobre tablas portafolio e inversion
+│   ├── user.repository       → operaciones sobre tabla usuario
+│   └── portfolio.repository  → operaciones sobre tablas portafolio e inversion
 │
-├── models/
-│   ├── user_model            → representa la tabla usuario
-│   ├── portfolio_model       → representa la tabla portafolio
-│   └── investment_model      → representa la tabla inversion
+├── entities/
+│   ├── user.model            → representa la tabla usuario
+│   ├── portfolio.model       → representa la tabla portafolio
+│   └── investment.model      → representa la tabla inversion
 │
 ├── security/
 │   ├── encryption            → cifrado y descifrado AES-256
 │   ├── hashing               → hash y verificación con bcrypt
-│   ├── jwt_handler           → generación y verificación de JWT
-│   └── totp_handler          → generación del secret, QR y verificación TOTP
+│   ├── jwt.handler           → generación y verificación de JWT
+│   └── totp.handler          → generación del secret, QR y verificación TOTP
 │
 ├── config/
-│   ├── database              → configuración de conexión a PostgreSQL
-│   ├── env.ts
-│   └── router.ts
+│   ├── database              → instancia unica de conexión a PostgreSQL
+│   ├── datasource            → configuración de conexión a PostgreSQL
+│   ├── env                   → carga y verifica la existencia de variables de entorno
+│   ├── http.errors           → crea los errores especificos para el endpoint
+│   └── router                → redireccionamiento de los endpoints
+│
+├── routes/
+│   ├── auth.routes           → expone endpoints despues de redireccionamiento de Route
 │
 └── main                      → punto de entrada, arranca el servidor Express
 ```
