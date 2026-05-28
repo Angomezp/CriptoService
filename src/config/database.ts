@@ -1,12 +1,31 @@
-import { Pool } from 'pg';
-import { env } from './env.js'; 
+import { AppDataSource } from "./datasource.js";
+import { DataSource } from "typeorm";
 
-const pool = new Pool({
-  host: env.dbHost,
-  port: env.dbPort, 
-  database: env.dbName,
-  user: env.dbUser,
-  password: env.dbPassword,
-});
+class Database {
+    private static instance: DataSource | null = null;
 
-export default pool;
+    private constructor() {}
+
+    public static getInstance(): DataSource {
+        if (!Database.instance) {
+            Database.instance = AppDataSource;
+        }
+        return Database.instance;
+    }
+
+    public static async initialize(): Promise<DataSource> {
+        const db = Database.getInstance();
+        if (!db.isInitialized) {
+            await db.initialize();
+        }
+        return db;
+    }
+
+    public static async close(): Promise<void> {
+        const ds = Database.getInstance();
+        if (ds && ds.isInitialized) {
+            await ds.destroy();
+        }
+        Database.instance = null;
+    }
+}
