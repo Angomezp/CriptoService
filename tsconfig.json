@@ -24,6 +24,10 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
+    // Decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
@@ -39,6 +43,8 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
-  }
+    "skipLibCheck": true
+  },
+  "include" : [ "src/**/*"],
+  "exclude": [ "prisma.config.ts"]
 }
