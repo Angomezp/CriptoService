@@ -80,9 +80,9 @@ paths:
       summary: Iniciar sesión
       description: >
         Verifica el correo y la contraseña del usuario con bcrypt.
-        Si el usuario tiene MFA activado, devuelve mfa_requerido: true y el cliente
-        debe continuar al endpoint /auth/verify-mfa.
-        Si el usuario no tiene MFA activado, devuelve el JWT directamente.
+        Si el usuario tiene MFA activado, devuelve mfa_requerido: true junto a un mfa_token
+        temporal. El cliente debe usar ese mfa_token para consumir /auth/verify-mfa.
+        Si el usuario no tiene MFA activado, devuelve el JWT de sesión definitivo directamente.
       requestBody:
         required: true
         content:
@@ -104,9 +104,9 @@ paths:
       responses:
         '200':
           description: >
-            Contraseña correcta. Si mfa_requerido es true, el cliente debe
-            solicitar el código TOTP y enviarlo a /auth/verify-mfa.
-            Si mfa_requerido es false, el token JWT viene directamente.
+            Contraseña correcta. Si mfa_requerido es true, el cliente obtiene un mfa_token
+            temporal de corta duración (3 min) para consumir /auth/verify-mfa.
+            Si mfa_requerido es false, el token JWT de acceso final viene directamente.
           content:
             application/json:
               schema:
@@ -120,6 +120,10 @@ paths:
                       mfa_requerido:
                         type: boolean
                         example: true
+                      mfa_token:
+                        type: string
+                        description: JWT temporal (expira en 3 min) con scope PRE_AUTH.
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.temporal...
                   - description: Usuario sin MFA
                     $ref: '#/components/schemas/TokenResponse'
         '401':
@@ -144,10 +148,12 @@ paths:
         - Autenticación
       summary: Verificar código MFA en el login
       description: >
-        Recibe el correo y el código de 6 dígitos generado por Google Authenticator.
-        El servidor busca el totp_secret del usuario en la BD, lo descifra con AES-256
-        y verifica si el código es válido. Si es correcto, genera y devuelve el JWT.
-        Este endpoint solo aplica durante el flujo de login cuando mfa_requerido es true.
+        Recibe el código de 6 dígitos generado por Google Authenticator y el mfa_token temporal 
+        en las cabeceras de autorización. El servidor valida el mfa_token, extrae el identificador
+        del usuario, busca su totp_secret en la BD, lo descifra con AES-256 y verifica si el código 
+        es válido. Si es correcto, genera y devuelve el JWT definitivo de acceso de sesión.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -155,13 +161,8 @@ paths:
             schema:
               type: object
               required:
-                - correo
                 - codigo_totp
               properties:
-                correo:
-                  type: string
-                  format: email
-                  example: angel@gmail.com
                 codigo_totp:
                   type: string
                   minLength: 6
@@ -169,13 +170,13 @@ paths:
                   example: "482910"
       responses:
         '200':
-          description: Código MFA válido, login exitoso.
+          description: Código MFA válido, login exitoso. Devuelve el JWT definitivo.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
         '401':
-          description: Código MFA inválido o expirado.
+          description: Código MFA inválido, expirado o mfa_token no válido.
           content:
             application/json:
               schema:

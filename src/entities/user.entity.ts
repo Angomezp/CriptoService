@@ -13,7 +13,6 @@ export class User {
     @Column({name : "correo", type : "varchar", length : 255, nullable : false, unique : true})
     Correo!: string;
 
-    // Si hasheamos en AES256 no deberia ser de longitud 256??
     @Column({name : "password_hash", type : "varchar", length : 255, nullable : false})
     PasswordHash!: string;
 

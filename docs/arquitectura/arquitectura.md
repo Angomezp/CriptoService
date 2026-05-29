@@ -52,36 +52,41 @@ Esta organización garantiza que cada capa tenga una única responsabilidad y pu
 proyecto_cripto/
 │
 ├── controllers/
-│   ├── auth_controller       → endpoints /register, /login, /verify-mfa
-│   ├── crypto_controller     → endpoints /prices, /history
-│   ├── portfolio_controller  → endpoints /portfolio, /investment
-│   └── prediction_controller → endpoint /prediction
+│   ├── auth.controller       → endpoints /register, /login, /verify-mfa
+│   ├── crypto.controller     → endpoints /prices, /history
+│   ├── portfolio.controller  → endpoints /portfolio, /investment
+│   └── prediction.controller → endpoint /prediction
 │
 ├── services/
-│   ├── auth_service          → lógica de registro y login
-│   ├── crypto_service        → consulta a API externa de precios (CoinGecko)
-│   ├── portfolio_service     → lógica de portafolio e inversiones
-│   └── prediction_service    → recibe la petición y consulta al servicio Python ML por HTTP
+│   ├── auth.service          → lógica de registro y login
+│   ├── crypto.service        → consulta a API externa de precios (CoinGecko)
+│   ├── portfolio.service     → lógica de portafolio e inversiones
+│   └── prediction.service    → recibe la petición y consulta al servicio Python ML por HTTP
 │
 ├── repositories/
-│   ├── user_repository       → operaciones sobre tabla usuario
-│   └── portfolio_repository  → operaciones sobre tablas portafolio e inversion
+│   ├── user.repository       → operaciones sobre tabla usuario
+│   └── portfolio.repository  → operaciones sobre tablas portafolio e inversion
 │
-├── models/
-│   ├── user_model            → representa la tabla usuario
-│   ├── portfolio_model       → representa la tabla portafolio
-│   └── investment_model      → representa la tabla inversion
+├── entities/
+│   ├── user.model            → representa la tabla usuario
+│   ├── portfolio.model       → representa la tabla portafolio
+│   └── investment.model      → representa la tabla inversion
 │
 ├── security/
 │   ├── encryption            → cifrado y descifrado AES-256
 │   ├── hashing               → hash y verificación con bcrypt
-│   ├── jwt_handler           → generación y verificación de JWT
-│   └── totp_handler          → generación del secret, QR y verificación TOTP
+│   ├── jwt.handler           → generación y verificación de JWT
+│   └── totp.handler          → generación del secret, QR y verificación TOTP
 │
 ├── config/
-│   ├── database              → configuración de conexión a PostgreSQL
-│   ├── env.ts
-│   └── router.ts
+│   ├── database              → instancia unica de conexión a PostgreSQL
+│   ├── datasource            → configuración de conexión a PostgreSQL
+│   ├── env                   → carga y verifica la existencia de variables de entorno
+│   ├── http.errors           → crea los errores especificos para el endpoint
+│   └── router                → redireccionamiento de los endpoints
+│
+├── routes/
+│   ├── auth.routes           → expone endpoints despues de redireccionamiento de Route
 │
 └── main                      → punto de entrada, arranca el servidor Express
 ```
@@ -117,13 +122,15 @@ La capa de seguridad es transversal, es decir, no pertenece a un solo dominio si
 ```
 1. Usuario envía correo + contraseña → Auth Controller
 2. Auth Controller delega → Auth Service
-3. Auth Service verifica contraseña con bcrypt (hashing)
-4. Si es correcta, Auth Service solicita código TOTP al usuario
-5. Usuario ingresa código desde Google Authenticator
-6. Auth Service recupera totp_secret cifrado de la BD (user_repository)
-7. Auth Service descifra el secret (encryption) y verifica el código (totp_handler)
-8. Si es correcto, Auth Service genera JWT (jwt_handler)
-9. JWT es devuelto al cliente
+3. Auth Service verifica credenciales con bcrypt (hashing)
+4. Si las credenciales son correctas:
+   - Si el usuario tiene MFA activo: El servidor entrega un token temporal de sesión y solicita el código del MFA.
+   - Si el usuario NO tiene MFA: El servidor entrega el token definitivo y finaliza el proceso.
+5. (Para MFA activo) Usuario envía el código MFA + el token temporal → Auth Controller (POST /auth/verify-mfa)
+6. Auth Controller valida el token temporal y obtiene la identidad del usuario
+7. Auth Service recupera el secret cifrado de la BD (user_repository)
+8. Auth Service descifra el secret (encryption) y verifica el código (totp_handler)
+9. Si el código es correcto, Auth Service genera el token definitivo y se devuelve al cliente
 ```
 
 ## 5. Flujo de predicciones
