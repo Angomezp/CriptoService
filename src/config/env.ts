@@ -9,12 +9,13 @@ interface EnvConfig {
     dbUser: string;
     dbPassword: string;
     dbName: string;
-    encryptionKey: string; 
-    dbType: string;
+    encryptionKey: string;
+    jwtSecret: string;
+    jwtMfaSecret: string;
 }
 
 function validateEnv() {
-    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'ENCRYPTION_KEY', 'DB_TYPE'];
+    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'ENCRYPTION_KEY', 'JWT_SECRET', 'JWT_MFA_SECRET'];
     const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
     if (missingEnvVars.length > 0) {
@@ -32,5 +33,6 @@ export const env: EnvConfig = {
     dbPassword: process.env.DB_PASSWORD as string,
     dbName: process.env.DB_NAME as string,
     encryptionKey: process.env.ENCRYPTION_KEY as string,
-    dbType: process.env.DB_TYPE as string
+    jwtSecret: process.env.JWT_SECRET as string,
+    jwtMfaSecret: process.env.JWT_MFA_SECRET as string
 };
