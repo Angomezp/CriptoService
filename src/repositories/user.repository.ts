@@ -17,4 +17,13 @@ export default class UserRepository {
         return await this.userRepo.findOne({ where: { id_usuario: id } });
     }
 
+    async updateMfaSecret(id: number, encryptedSecret: string, enabled: boolean): Promise<User> {
+        const user = await this.findById(id);
+        if (!user) throw new Error('Usuario no encontrado');
+        user.TOTPSecret = encryptedSecret;
+        user.MFAEnabled = enabled;
+        return await this.userRepo.save(user);
+    }
+    
+
 }
