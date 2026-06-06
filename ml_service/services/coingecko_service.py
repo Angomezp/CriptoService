@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
+
 from ml_service.config.env import config
+
+from ml_service.exceptions.external_service_exception import ExternalServiceException
 
 class CoinGeckoService:
 
@@ -10,8 +13,7 @@ class CoinGeckoService:
         self.timeout = 10
         self.coin_decimal_precision = 8
 
-    def get_market_chart(
-        self,
+    def get_market_chart( self,
         coin_id: str,
         return_currency: str = "usd",
         days: int = 100,
@@ -32,28 +34,44 @@ class CoinGeckoService:
         if self.api_key:
             headers["x-cg-demo-api-key"] = self.api_key
 
-        response = requests.get(
-            url=url,
-            params=params,
-            headers=headers,
-            timeout=self.timeout
-        )
+        try:
+            response = requests.get(
+                url=url,
+                params=params,
+                headers=headers,
+                timeout=self.timeout
+            )
 
-        response.raise_for_status()
+            response.raise_for_status()
 
-        data = response.json()
+            data = response.json()
 
+            return self._make_dataframe(data)
+
+        except requests.Timeout as e:
+            raise ExternalServiceException( f"Tiempo de espera agotado al conectar con CoinGecko: {str(e)}" )
+        
+        except requests.HTTPError as e:
+            raise ExternalServiceException( f"Error HTTP al conectar con CoinGecko: {str(e)}" )
+        
+        except requests.RequestException as e:
+            raise ExternalServiceException( f"Error al conectar con CoinGecko: {str(e)}" )
+
+
+    def _make_dataframe(self, 
+        data: dict
+    ) -> pd.DataFrame:
+
+        if not  data.get("prices") or not data.get("market_caps") or not data.get("total_volumes"):
+            raise ExternalServiceException( "La respuesta de CoinGecko no contiene los campos esperados." )
+        
         prices = data["prices"]
         market_caps = data["market_caps"]
         total_volumes = data["total_volumes"]
 
         rows = []
 
-        for price_data, market_cap_data, volume_data in zip(
-            prices,
-            market_caps,
-            total_volumes
-        ):
+        for price_data, market_cap_data, volume_data in zip( prices, market_caps, total_volumes ):
             
             price_timestamp, price = price_data
             market_cap_timestamp, market_cap = market_cap_data
@@ -65,11 +83,13 @@ class CoinGeckoService:
                     unit="ms"
                 ),
                 "precio": price,
-                "market_cap": market_cap,
-                "total_volume": volume
+                "capitalizacion_mercado": market_cap,
+                "volumen": volume
             })
+        df = pd.DataFrame(rows)
 
-        return pd.DataFrame(rows)
+        return df.sort_values( by="fecha_hora" ).reset_index( drop=True )
+
 
 
 

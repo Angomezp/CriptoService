@@ -37,6 +37,18 @@ CREATE TABLE modelos (
 
     observaciones INTEGER,
 
+    ruta_modelo VARCHAR(255) NOT NULL,
+
+    activo BOOLEAN NOT NULL DEFAULT FALSE,
+
+    simbolo VARCHAR(20) NOT NULL,
+
     fecha_entrenamiento TIMESTAMP NOT NULL
         DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_modelo_activo
+    ON modelos(activo);
+
+CREATE INDEX idx_modelo_simbolo_activo
+    ON modelos(simbolo, activo);

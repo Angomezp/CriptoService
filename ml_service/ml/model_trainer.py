@@ -1,0 +1,125 @@
+from pathlib import Path
+import joblib
+from datetime import datetime
+
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error
+)
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.multioutput import MultiOutputRegressor
+from xgboost import XGBRegressor
+
+from ml_service.entities.model_metadata_entity import ModelMetadata
+
+from ml_service.repositories.crypto_price_repository import CryptoPriceRepository
+from ml_service.repositories.model_metadata_repository import ModelMetadataRepository
+
+from ml_service.ml.feature_helper import FeatureHelper
+
+from ml_service.exceptions.app_exception import AppException
+
+
+class ModelTrainer:
+
+    def __init__(self):
+
+        self.crypto_repository =  CryptoPriceRepository() 
+
+        self.model_repository =  ModelMetadataRepository()
+
+        self.feature_helper =  FeatureHelper()
+
+        self.minimum_data_points = 200
+
+    def train( self,
+        symbol: str,
+        model_params: dict | None = None
+    ) -> dict:
+
+        try:
+            historical_df = self.crypto_repository.get_training_data( symbol )
+
+            if historical_df.empty:
+                raise AppException( f"No existen datos históricos para {symbol}" )
+            
+            if len(historical_df) < self.minimum_data_points:
+                raise AppException( f"No hay suficientes datos para entrenar un modelo para {symbol}. Se requieren al menos {self.minimum_data_points} registros." )
+
+            dataset = self.feature_helper.build_dataset( historical_df )
+
+            if dataset.empty:
+                raise AppException( "No fue posible generar el dataset de entrenamiento" )
+
+            X, y =  self.feature_helper.split_features_targets( dataset ) 
+
+            X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2, shuffle=False ) 
+
+            if model_params is None:
+                model_params = {
+                    "n_estimators": 100,
+                    "max_depth": 4,
+                    "learning_rate": 0.05,
+                    "objective": "reg:squarederror",
+                    "random_state": 42
+                }
+
+            model = MultiOutputRegressor(
+                XGBRegressor(
+                    n_estimators = model_params["n_estimators"],
+                    max_depth = model_params["max_depth"],
+                    learning_rate = model_params["learning_rate"],
+                    objective = model_params["objective"],
+                    random_state = model_params["random_state"]
+                )
+            )
+
+            model.fit( X_train, y_train )
+
+            predictions = model.predict( X_test )
+
+            mae = float( mean_absolute_error( y_test, predictions ) )
+
+            rmse = float( mean_squared_error( y_test, predictions ) ** 0.5 )
+
+            Path( "models" ).mkdir( exist_ok=True )
+
+            training_date = datetime.now()
+
+            file_date = training_date.strftime( "%Y-%m-%d_%H-%M-%S" )
+
+            model_path =  f"models/{symbol.lower()}_{file_date}_predictor.joblib" 
+
+            joblib.dump( model, model_path )
+
+            if not Path(model_path).exists():
+                raise AppException( "No fue posible guardar el modelo entrenado" )
+
+            metadata = ModelMetadata(
+                nombre=f"{symbol} Predictor",
+                algoritmo="XGBoost",
+                version="1.0",
+                ruta_modelo=model_path,
+                mae=mae,
+                rmse=rmse,
+                observaciones=len(dataset),
+                activo=True,
+                fecha_entrenamiento= training_date,
+                simbolo=symbol
+            )
+
+            self.model_repository.save( metadata )
+
+            return {
+                "symbol": symbol,
+                "observaciones": len(dataset),
+                "mae": mae,
+                "rmse": rmse,
+                "ruta_modelo": model_path
+            }
+        except AppException as e:
+            raise e
+        except Exception as e:
+            raise AppException( f"Error durante el entrenamiento para {symbol}: {str(e)}" )
