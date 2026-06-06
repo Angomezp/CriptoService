@@ -29,11 +29,9 @@ class ModelMetadataRepository:
         except SQLAlchemyError as e:
 
             session.rollback()
-
             raise DatabaseException( f"Error guardando metadata del modelo: {str(e)}" )
 
         finally:
-
             session.close()
 
     def get_active_models( self ) -> list[ModelMetadata] | None:
@@ -41,7 +39,6 @@ class ModelMetadataRepository:
         session = Database.get_session()
 
         try:
-
             return ( 
                 session.query(ModelMetadata)
                     .filter( ModelMetadata.activo.is_(True) )
@@ -50,11 +47,9 @@ class ModelMetadataRepository:
             )
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando modelos activos: {str(e)}" )
 
         finally:
-
             session.close()
 
     def get_by_id( self,
@@ -64,7 +59,6 @@ class ModelMetadataRepository:
         session = Database.get_session()
 
         try:
-
             return (
                 session.query(ModelMetadata)
                     .filter(  ModelMetadata.id == model_id )
@@ -72,11 +66,9 @@ class ModelMetadataRepository:
             )
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando modelo: {str(e)}" )
 
         finally:
-
             session.close()
 
     def get_all_models( self ) -> list[ModelMetadata]:
@@ -84,7 +76,6 @@ class ModelMetadataRepository:
         session = Database.get_session()
 
         try:
-
             return (
                 session.query(ModelMetadata)
                     .order_by( ModelMetadata.fecha_entrenamiento.desc() )
@@ -92,11 +83,9 @@ class ModelMetadataRepository:
             )
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando modelos: {str(e)}" )
-
+        
         finally:
-
             session.close()
     
     def get_latest_active_model( self,
@@ -113,9 +102,27 @@ class ModelMetadataRepository:
             )
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando modelo activo: {str(e)}" )
 
         finally:
+            session.close()
+    
+    def get_all_active_models( self,
+        symbol: str
+    ) -> list[ModelMetadata]:
 
+        session = Database.get_session()
+
+        try:
+            return (
+                session.query(ModelMetadata)
+                    .filter( ModelMetadata.activo.is_(True), func.lower(ModelMetadata.simbolo) == func.lower(symbol) )
+                    .order_by( ModelMetadata.fecha_entrenamiento.desc() )
+                    .all()
+            )
+
+        except SQLAlchemyError as e:
+            raise DatabaseException( f"Error consultando modelos activos: {str(e)}" )
+
+        finally:
             session.close()

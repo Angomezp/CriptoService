@@ -1,21 +1,12 @@
 from pprint import pprint
 
-from ml_service.ml.feature_helper import (
-    FeatureHelper
-)
+from ml_service.ml.feature_helper import FeatureHelper
 
-from ml_service.ml.model_trainer import (
-    ModelTrainer
-)
+from ml_service.ml.model_trainer import ModelTrainer
 
-from ml_service.repositories.crypto_price_repository import (
-    CryptoPriceRepository
-)
+from ml_service.repositories.crypto_price_repository import CryptoPriceRepository
 
-from ml_service.services.prediction_service import (
-    PredictionService
-)
-
+from ml_service.services.models_service import ModelsService
 
 def test_historical_data():
 
@@ -103,7 +94,7 @@ def test_prediction():
 
     print("\n=== PREDICTION ===")
 
-    service = PredictionService()
+    service = ModelsService()
 
     result = service.predict(
         "BTC"
