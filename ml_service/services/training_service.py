@@ -26,7 +26,8 @@ class TrainingService:
     
     def train_model( self,
         symbol: str,
-        coin_gecko_id: str
+        coin_gecko_id: str,
+        model_params: dict | None = None
     ):
         try:
 
@@ -48,7 +49,7 @@ class TrainingService:
 
             inserted = self.crypto_repository.save_prices( symbol, historical_data )
 
-            training_result = self.model_trainer.train( symbol )
+            training_result = self.model_trainer.train( symbol, model_params )
 
             return {
                 "trained": True,

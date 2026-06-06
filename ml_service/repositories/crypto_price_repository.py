@@ -81,17 +81,27 @@ class CryptoPriceRepository:
     def find_last_records( self,
         symbol: str,
         limit: int = 30
-    ) -> list[CryptoPrice]:
+    ) -> pd.DataFrame:
 
         session = Database.get_session()
         try:
-            return (
+            records = (
                 session.query(CryptoPrice)
                     .filter( CryptoPrice.simbolo == symbol )
                     .order_by( CryptoPrice.fecha_hora.desc() )
                     .limit(limit)
                     .all()
             )
+            return pd.DataFrame([
+                {
+                    "fecha_hora": record.fecha_hora,
+                    "precio": float(record.precio),
+                    "capitalizacion_mercado": float(record.capitalizacion_mercado) if record.capitalizacion_mercado is not None else None, 
+                    "volumen": float(record.volumen) if record.volumen is not None else None
+                }
+                for record in records
+            ])
+
 
         except SQLAlchemyError as e:
 
@@ -118,8 +128,8 @@ class CryptoPriceRepository:
                 {
                     "fecha_hora": record.fecha_hora,
                     "precio": float(record.precio),
-                    "capitalizacion_mercado": ( float(record.capitalizacion_mercado) if record.capitalizacion_mercado is not None else None ),
-                    "volumen_24h": ( float(record.volumen) if record.volumen is not None else None )
+                    "capitalizacion_mercado":  float(record.capitalizacion_mercado) if record.capitalizacion_mercado is not None else None,
+                    "volumen": float(record.volumen) if record.volumen is not None else None
                 }
                 for record in records
             ]

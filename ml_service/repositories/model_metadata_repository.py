@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
 from ml_service.config.database import Database
@@ -106,7 +107,7 @@ class ModelMetadataRepository:
         try:
             return (
                 session.query(ModelMetadata)
-                    .filter( ModelMetadata.activo.is_(True) & str.lower(ModelMetadata.simbolo) == str.lower(symbol) )
+                    .filter( ModelMetadata.activo.is_(True), func.lower(ModelMetadata.simbolo) == func.lower(symbol) )
                     .order_by( ModelMetadata.fecha_entrenamiento.desc() )
                     .first()
             )

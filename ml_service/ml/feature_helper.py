@@ -25,7 +25,7 @@ class FeatureHelper:
             required_columns = [
                 "fecha_hora",
                 "precio",
-                "volumen_24h"
+                "volumen"
             ]
 
             missing = [
@@ -55,7 +55,7 @@ class FeatureHelper:
 
             df["retorno_24h"] = ( df["precio"].pct_change(24) )
 
-            df["cambio_volumen_24h"] = ( df["volumen_24h"].pct_change(24) )
+            df["cambio_volumen_24h"] = ( df["volumen"].pct_change(24) )
 
             df["sma_24"] = ( df["precio"].rolling(24).mean() )
 
@@ -107,7 +107,7 @@ class FeatureHelper:
 
             df["retorno_24h"] = ( df["precio"].pct_change(24) )
 
-            df["cambio_volumen_24h"] = ( df["volumen_24h"].pct_change(24) )
+            df["cambio_volumen_24h"] = ( df["volumen"].pct_change(24) )
 
             df["sma_24"] = ( df["precio"].rolling(24).mean())
 

@@ -17,7 +17,7 @@ class ModelMetadata(Base):
     __tablename__ = "modelos"
 
     __table_args__ = (
-        Index( "idx_modelo_activo", "activo" )
+        Index( "idx_modelo_activo", "activo" ),
     )
 
     id = Column( Integer, primary_key=True, autoincrement=True )

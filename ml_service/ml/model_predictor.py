@@ -11,7 +11,6 @@ class ModelPredictor:
     ):
         try:
             if not Path(model_path).exists():
-
                 raise AppException( f"No existe el modelo: {model_path}" )
 
             return joblib.load( model_path )

@@ -63,7 +63,8 @@ class ModelTrainer:
                     "max_depth": 4,
                     "learning_rate": 0.05,
                     "objective": "reg:squarederror",
-                    "random_state": 42
+                    "random_state": 42,
+                    "n_jobs": 1
                 }
 
             model = MultiOutputRegressor(
@@ -72,7 +73,8 @@ class ModelTrainer:
                     max_depth = model_params["max_depth"],
                     learning_rate = model_params["learning_rate"],
                     objective = model_params["objective"],
-                    random_state = model_params["random_state"]
+                    random_state = model_params["random_state"],
+                     n_jobs = model_params["n_jobs"]
                 )
             )
 
@@ -84,13 +86,13 @@ class ModelTrainer:
 
             rmse = float( mean_squared_error( y_test, predictions ) ** 0.5 )
 
-            Path( "models" ).mkdir( exist_ok=True )
+            Path( "ml_service/models" ).mkdir( exist_ok=True )
 
             training_date = datetime.now()
 
             file_date = training_date.strftime( "%Y-%m-%d_%H-%M-%S" )
 
-            model_path =  f"models/{symbol.lower()}_{file_date}_predictor.joblib" 
+            model_path =  f"ml_service/models/{symbol.lower()}_{file_date}_predictor.joblib" 
 
             joblib.dump( model, model_path )
 
