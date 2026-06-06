@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
+    "dev": "tsx src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -29,8 +29,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
-    "ts-node": "^10.9.2",
     "@types/qrcode": "^1.5.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },
   "dependencies": {
@@ -41,8 +42,8 @@
     "jsonwebtoken": "^9.0.3",
     "otplib": "^13.4.0",
     "pg": "^8.21.0",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^1.0.0",
-    "qrcode": "^1.5.4"
+    "typeorm": "^1.0.0"
   }
 }

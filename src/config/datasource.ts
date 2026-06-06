@@ -1,25 +1,19 @@
-import { env }  from './env.js';
+import { env } from './env.js';
 import { DataSource } from 'typeorm';
-import { User } from '../entities/user.entity.js';
-import { Portafolio } from '../entities/portafolio.entity.js';
-import { Inversion } from '../entities/inversion.entity.js';
 
 export const AppDataSource = new DataSource({
-    type: env.dbType as any,
+    type: "postgres",
     host: env.dbHost,
-    port: parseInt(String(env.dbPort)),
-    username: env.dbUser,
+    port: env.dbPort,
+    username: env.dbUsername,
     password: env.dbPassword,
     database: env.dbName,
-
+    synchronize: true,
     logging: false,
-    synchronize: false,
-
-    entities: [
-        User,
-        Portafolio,
-        Inversion
-    ]
-
+    ssl: {
+        rejectUnauthorized: false
+    },
+    entities: ["src/entities/**/*.ts"],
+    subscribers: [],
+    migrations: [],
 });
-
