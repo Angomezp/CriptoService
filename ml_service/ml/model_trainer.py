@@ -12,10 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputRegressor
 from xgboost import XGBRegressor
 
-from ml_service.entities.model_metadata_entity import ModelMetadata
-
 from ml_service.repositories.crypto_price_repository import CryptoPriceRepository
-from ml_service.repositories.model_metadata_repository import ModelMetadataRepository
 
 from ml_service.ml.feature_helper import FeatureHelper
 
@@ -27,8 +24,6 @@ class ModelTrainer:
     def __init__(self):
 
         self.crypto_repository =  CryptoPriceRepository() 
-
-        self.model_repository =  ModelMetadataRepository()
 
         self.feature_helper =  FeatureHelper()
 
@@ -86,7 +81,7 @@ class ModelTrainer:
 
             rmse = float( mean_squared_error( y_test, predictions ) ** 0.5 )
 
-            Path( "ml_service/models" ).mkdir( exist_ok=True )
+            Path( "ml_service/models" ).mkdir( exist_ok=True, parents=True )
 
             training_date = datetime.now()
 
@@ -99,28 +94,16 @@ class ModelTrainer:
             if not Path(model_path).exists():
                 raise AppException( "No fue posible guardar el modelo entrenado" )
 
-            metadata = ModelMetadata(
-                nombre=f"{symbol} Predictor",
-                algoritmo="XGBoost",
-                version="1.0",
-                ruta_modelo=model_path,
-                mae=mae,
-                rmse=rmse,
-                observaciones=len(dataset),
-                activo=True,
-                fecha_entrenamiento= training_date,
-                simbolo=symbol
-            )
-
-            self.model_repository.save( metadata )
 
             return {
                 "symbol": symbol,
                 "observaciones": len(dataset),
                 "mae": mae,
                 "rmse": rmse,
-                "ruta_modelo": model_path
+                "ruta_modelo": model_path,
+                "fecha_entrenamiento": training_date
             }
+        
         except AppException as e:
             raise e
         except Exception as e:

@@ -62,7 +62,7 @@ class CoinGeckoService:
         data: dict
     ) -> pd.DataFrame:
 
-        if not  data.get("prices") or not data.get("market_caps") or not data.get("total_volumes"):
+        if not data.get("prices") or not data.get("market_caps") or not data.get("total_volumes"):
             raise ExternalServiceException( "La respuesta de CoinGecko no contiene los campos esperados." )
         
         prices = data["prices"]
@@ -74,14 +74,11 @@ class CoinGeckoService:
         for price_data, market_cap_data, volume_data in zip( prices, market_caps, total_volumes ):
             
             price_timestamp, price = price_data
-            market_cap_timestamp, market_cap = market_cap_data
-            volume_timestamp, volume = volume_data
+            _, market_cap = market_cap_data
+            _, volume = volume_data
 
             rows.append({
-                "fecha_hora": pd.to_datetime(
-                    price_timestamp,
-                    unit="ms"
-                ),
+                "fecha_hora": pd.to_datetime( price_timestamp, unit="ms" ),
                 "precio": price,
                 "capitalizacion_mercado": market_cap,
                 "volumen": volume

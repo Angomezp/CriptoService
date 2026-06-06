@@ -20,12 +20,12 @@ class CryptoPriceRepository:
         try:
             last_record = (
                 session.query( CryptoPrice )
-                .filter( CryptoPrice.simbolo == symbol )
-                .order_by( CryptoPrice.fecha_hora.desc() )
-                .first()
+                    .filter( CryptoPrice.simbolo == symbol )
+                    .order_by( CryptoPrice.fecha_hora.desc() )
+                    .first()
             )
 
-            last_date = ( last_record.fecha_hora if last_record else None )
+            last_date = last_record.fecha_hora if last_record else None
 
             entities = []
 
@@ -72,7 +72,6 @@ class CryptoPriceRepository:
             )
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando histórico: {str(e)}" )
 
         finally:
@@ -80,7 +79,7 @@ class CryptoPriceRepository:
 
     def find_last_records( self,
         symbol: str,
-        limit: int = 30
+        limit: int = 50
     ) -> pd.DataFrame:
 
         session = Database.get_session()
@@ -104,7 +103,6 @@ class CryptoPriceRepository:
 
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error consultando registros: {str(e)}" )
 
         finally:
@@ -137,9 +135,7 @@ class CryptoPriceRepository:
             return pd.DataFrame(data)
 
         except SQLAlchemyError as e:
-
             raise DatabaseException( f"Error obteniendo datos de entrenamiento: {str(e)}"  )
 
         finally:
-
             session.close()

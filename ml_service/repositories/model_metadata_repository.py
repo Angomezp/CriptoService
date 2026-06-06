@@ -19,16 +19,14 @@ class ModelMetadataRepository:
 
         try:
             session.add(model_metadata)
-
             session.commit()
-
             session.refresh(model_metadata)
 
             return model_metadata
 
         except SQLAlchemyError as e:
-
             session.rollback()
+            
             raise DatabaseException( f"Error guardando metadata del modelo: {str(e)}" )
 
         finally:
@@ -71,7 +69,9 @@ class ModelMetadataRepository:
         finally:
             session.close()
 
-    def get_all_models( self ) -> list[ModelMetadata]:
+    def get_all_models( self,
+        symbol: str | None = None
+     ) -> list[ModelMetadata]:
 
         session = Database.get_session()
 
@@ -79,6 +79,7 @@ class ModelMetadataRepository:
             return (
                 session.query(ModelMetadata)
                     .order_by( ModelMetadata.fecha_entrenamiento.desc() )
+                    .filter( func.lower(ModelMetadata.simbolo) == func.lower(symbol) if symbol else True )
                     .all()
             )
 

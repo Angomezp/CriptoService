@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from ml_service.entities.model_metadata_entity import ModelMetadata
 from ml_service.services.coingecko_service import CoinGeckoService
 from ml_service.repositories.crypto_price_repository import CryptoPriceRepository
 from ml_service.repositories.model_metadata_repository import ModelMetadataRepository
@@ -49,6 +50,20 @@ class ModelsService:
             inserted = self.crypto_repo.save_prices( symbol, historical_data )
 
             training_result = self.trainer.train( symbol, model_params )
+
+            metadata = ModelMetadata(
+                nombre=f"{symbol} Predictor",
+                algoritmo="XGBoost",
+                version="1.0",
+                ruta_modelo=training_result["ruta_modelo"],
+                mae=training_result["mae"],
+                rmse=training_result["rmse"],
+                observaciones=training_result["observaciones"],
+                activo=True,
+                fecha_entrenamiento=training_result["fecha_entrenamiento"],
+                simbolo=symbol
+            )
+            self.model_repo.save(metadata)
 
             return {
                 "trained": True,
@@ -113,7 +128,7 @@ class ModelsService:
         except Exception as e:
             raise AppException(f"Error generando predicción: {str(e)}")
     
-    def get_models(self, symbol: str = None):
+    def get_models(self, symbol: str | None = None):
         return self.model_repo.get_all_models(symbol)
     
     def get_active_model(self, symbol: str):

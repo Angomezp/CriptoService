@@ -1,5 +1,6 @@
 from pathlib import Path
 import joblib
+import pandas as pd
 
 from ml_service.exceptions.app_exception import AppException
 
@@ -23,7 +24,7 @@ class ModelPredictor:
 
     def predict( self,
         model_path: str,
-        features
+        features: pd.DataFrame
     ):
 
         try:

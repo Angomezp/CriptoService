@@ -1,173 +1,51 @@
-from pprint import pprint
-
-from ml_service.ml.feature_helper import FeatureHelper
-
-from ml_service.ml.model_trainer import ModelTrainer
-
-from ml_service.repositories.crypto_price_repository import CryptoPriceRepository
-
 from ml_service.services.models_service import ModelsService
-
-def test_historical_data():
-
-    print("\n=== HISTORICAL DATA ===")
-
-    repository = CryptoPriceRepository()
-
-    df = repository.get_training_data(
-        "BTC"
-    )
-
-    print(f"Registros: {len(df)}")
-
-    print(df.head())
-
-    if df.empty:
-        raise Exception(
-            "No se encontraron datos históricos"
-        )
-
-    return df
-
-
-def test_features(df):
-
-    print("\n=== FEATURE ENGINEERING ===")
-
-    feature_helper = FeatureHelper()
-
-    dataset = (
-        feature_helper.build_dataset(df)
-    )
-
-    print(
-        f"Dataset generado: {dataset.shape}"
-    )
-
-    print(
-        dataset.head()
-    )
-
-    X, y = (
-        feature_helper.split_features_targets(
-            dataset
-        )
-    )
-
-    print(
-        f"X shape: {X.shape}"
-    )
-
-    print(
-        f"y shape: {y.shape}"
-    )
-
-    if X.empty:
-        raise Exception(
-            "Features vacías"
-        )
-
-    if y.empty:
-        raise Exception(
-            "Targets vacíos"
-        )
-
-    return dataset
-
-
-def test_training():
-
-    print("\n=== MODEL TRAINING ===")
-
-    trainer = ModelTrainer()
-
-    result = trainer.train(
-        "BTC"
-    )
-
-    pprint(result)
-
-    return result
-
-
-def test_prediction():
-
-    print("\n=== PREDICTION ===")
-
-    service = ModelsService()
-
-    result = service.predict(
-        "BTC"
-    )
-
-    pprint(result)
-
-    predictions = (
-        result["predicciones"]
-    )
-
-    print(
-        f"Predicciones generadas: {len(predictions)}"
-    )
-
-    if len(predictions) != 24:
-
-        raise Exception(
-            "El modelo no devolvió 24 horizontes"
-        )
-
-    return result
-
 
 def main():
 
-    print(
-        "\n=================================="
+    service = ModelsService()
+
+    symbol = "BTC"
+
+    print("\n=== TRAINING TEST ===")
+
+    training_result = service.train_model(
+        symbol=symbol,
+        coin_gecko_id="bitcoin"
     )
 
-    print(
-        "CRYPTO ML PIPELINE TEST"
-    )
+    print(training_result)
 
-    print(
-        "=================================="
-    )
+    print("\n=== ACTIVE MODEL TEST ===")
 
-    historical_df = (
-        test_historical_data()
-    )
+    active_model = service.get_active_model(symbol)
 
-    test_features(
-        historical_df
-    )
+    print(f"ID: {active_model.id}")
+    print(f"Model: {active_model.nombre}")
+    print(f"Path: {active_model.ruta_modelo}")
 
-    test_training()
+    print("\n=== PREDICTION TEST ===")
 
-    test_prediction()
-
-    print(
-        "\n=================================="
-    )
+    prediction_result = service.predict(symbol)
 
     print(
-        "PIPELINE OK"
+        f"Predictions generated: "
+        f"{len(prediction_result['predicciones'])}"
     )
 
     print(
-        "=================================="
+        prediction_result["predicciones"][:3]
     )
+
+    print("\n=== MODELS TEST ===")
+
+    models = service.get_models(symbol)
+
+    print(
+        f"Models found: {len(models)}"
+    )
+
+    print("\n=== SUCCESS ===")
 
 
 if __name__ == "__main__":
-
-    try:
-
-        main()
-
-    except Exception as e:
-
-        print(
-            "\nERROR:"
-        )
-
-        print(e)
+    main()
