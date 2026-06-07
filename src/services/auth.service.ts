@@ -5,6 +5,12 @@ import * as jwtHandler from '../security/jwt.handler.js';
 import * as totpHandler from '../security/totp.handler.js';
 import * as encryptionHandler from '../security/encryption.js';
 import { env } from '../config/env.js';
+import crypto from 'crypto';
+import { PasswordResetToken } from '../entities/password_reset.entity.js';
+import { Database } from '../config/database.js';
+import { enviarCorreoRecuperacion, enviarAlertaBloqueo } from './mailer.service.js';
+import { User } from '../entities/user.entity.js';
+
 
 export default class AuthService {
 
@@ -67,6 +73,11 @@ export default class AuthService {
 
                 if (intentosActuales >= env.maxIntentosLogin) {
                     await this.userRepo.bloquearUsuario(user.idUsuario, env.bloqueoMinutos);
+
+                     enviarAlertaBloqueo(user.correo, env.bloqueoMinutos, env.appUrl).catch((err) => {
+                        console.error('Error enviando alerta de bloqueo:', err);
+                    });
+
                     throw new AppError(
                         `Cuenta bloqueada por múltiples intentos fallidos. Intenta de nuevo en ${env.bloqueoMinutos} minutos.`,
                         423,
@@ -173,6 +184,97 @@ export default class AuthService {
         await this.userRepo.updateMfaSecret(user.idUsuario, user.totpSecret!, true);
     }
 
+    public async solicitarRecuperacion(correo: string) {
+        try {
+            const user = await this.userRepo.findByEmail(correo);
+
+            if (!user) {
+                return { message: 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.' };
+            }
+
+            const token = crypto.randomBytes(32).toString('hex');
+
+            const tokenHash = await hashear(token);
+
+            const expiraEn = new Date(Date.now() + env.passwordResetTtlMin * 60 * 1000);
+
+            const tokenRepo = Database.getInstance().getRepository(PasswordResetToken);
+            const nuevoToken = tokenRepo.create({
+                usuario: user,
+                tokenHash: tokenHash,
+                expiraEn: expiraEn,
+                usado: false,
+            });
+            const tokenGuardado = await tokenRepo.save(nuevoToken);
+
+            const link = `${env.appUrl}/reset-password?token=${token}&id=${tokenGuardado.idToken}`;
+
+            enviarCorreoRecuperacion(user.correo, link).catch((err) => {
+                console.error('Error enviando correo de recuperación:', err);
+            });
+
+            return { message: 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.' };
+
+        } catch (error: any) {
+            if (error instanceof AppError) throw error;
+            throw new AppError('Error al procesar la solicitud', 500, 'FORGOT_PASSWORD_ERROR', {
+                originalMessage: (error as Error)?.message,
+            });
+        }
+    }
+
+    public async restablecerPassword(idToken: number, token: string, nuevaPassword: string) {
+        try {
+            const tokenRepo = Database.getInstance().getRepository(PasswordResetToken);
+
+            const registro = await tokenRepo.findOne({
+                where: { idToken: idToken },
+                relations: { usuario: true },
+            });
+
+            if (!registro) {
+                throw new AppError('Token inválido o expirado', 400, 'INVALID_RESET_TOKEN');
+            }
+
+            if (registro.usado) {
+                throw new AppError('Este enlace ya fue utilizado', 400, 'TOKEN_ALREADY_USED');
+            }
+
+            if (registro.expiraEn < new Date()) {
+                throw new AppError('El enlace ha expirado', 400, 'TOKEN_EXPIRED');
+            }
+
+            const tokenValido = await verificar(token, registro.tokenHash);
+            if (!tokenValido) {
+                throw new AppError('Token inválido', 400, 'INVALID_RESET_TOKEN');
+            }
+
+            const validacion = this.isValidPassword(nuevaPassword);
+            if (validacion !== true) {
+                throw new ValidationError(validacion as string);
+            }
+
+            const usuario = registro.usuario;
+            usuario.passwordHash = await hashear(nuevaPassword);
+
+            usuario.intentosFallidos = 0;
+            usuario.bloqueadoHasta = null;
+
+            registro.usado = true;
+
+            const userTypeOrmRepo = Database.getInstance().getRepository(User);
+            await userTypeOrmRepo.save(usuario);
+            await tokenRepo.save(registro);
+
+            return { message: 'Contraseña actualizada exitosamente' };
+
+        } catch (error: any) {
+            if (error instanceof AppError) throw error;
+            throw new AppError('Error al restablecer la contraseña', 500, 'RESET_PASSWORD_ERROR', {
+                originalMessage: (error as Error)?.message,
+            });
+        }
+    }
 
     private isValidPassword(password: string): String | boolean {
         if (password.length < 8) {

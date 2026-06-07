@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import AuthService  from '../services/auth.service.js';
-import { AppError } from '../config/http.errors.js';
+import { AppError, ValidationError } from '../config/http.errors.js';
 
 const authService = new AuthService();
 
@@ -119,3 +119,47 @@ export const confirmMfa = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Error del servidor al confirmar MFA' });
     }
 }
+
+export const forgotPassword = async (req: Request, res: Response) => {
+    const body = req.body;
+    if (!body || !body.correo) {
+        return res.status(400).json({ message: 'Datos incompletos' });
+    }
+    try {
+        const result = await authService.solicitarRecuperacion(body.correo);
+        res.status(200).json({ message: result.message });
+    } catch (error: any) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message,
+                code: error.code,
+                details: error.details,
+            });
+        }
+        return res.status(500).json({ message: 'Error del servidor al procesar la solicitud' });
+    }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+    const body = req.body;
+    if (!body || !body.idToken || !body.token || !body.nuevaPassword) {
+        return res.status(400).json({ message: 'Datos incompletos. Se requieren: idToken, token y nuevaPassword' });
+    }
+    try {
+        const result = await authService.restablecerPassword(
+            Number(body.idToken),
+            body.token,
+            body.nuevaPassword
+        );
+        res.status(200).json({ message: result.message });
+    } catch (error: any) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message,
+                code: error.code,
+                details: error.details,
+            });
+        }
+        return res.status(500).json({ message: 'Error del servidor al restablecer la contraseña' });
+    }
+};

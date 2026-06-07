@@ -15,10 +15,17 @@ interface EnvConfig {
     jwtMfaSecret: string;
     maxIntentosLogin: number;
     bloqueoMinutos: number;
+    smtpHost: string;
+    smtpPort: number;
+    smtpUser: string;
+    smtpPass: string;
+    smtpFrom: string;
+    appUrl: string;
+    passwordResetTtlMin: number;
 }
 
 function validateEnv() {
-    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME','DB_TYPE' ,'ENCRYPTION_KEY', 'JWT_SECRET', 'JWT_MFA_SECRET', 'MAX_INTENTOS_LOGIN', 'BLOQUEO_MINUTOS'];
+    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME','DB_TYPE' ,'ENCRYPTION_KEY', 'JWT_SECRET', 'JWT_MFA_SECRET', 'MAX_INTENTOS_LOGIN', 'BLOQUEO_MINUTOS', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'APP_URL', 'PASSWORD_RESET_TTL_MIN'];
     const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
     if (missingEnvVars.length > 0) {
@@ -40,5 +47,12 @@ export const env: EnvConfig = {
     jwtMfaSecret: process.env.JWT_MFA_SECRET as string,
     dbType: process.env.DB_TYPE as string,
     maxIntentosLogin: Number(process.env.MAX_INTENTOS_LOGIN),
-    bloqueoMinutos: Number(process.env.BLOQUEO_MINUTOS)
+    bloqueoMinutos: Number(process.env.BLOQUEO_MINUTOS),
+    smtpHost: process.env.SMTP_HOST as string,
+    smtpPort: Number(process.env.SMTP_PORT),
+    smtpUser: process.env.SMTP_USER as string,
+    smtpPass: process.env.SMTP_PASS as string,
+    smtpFrom: process.env.SMTP_FROM as string,
+    appUrl: process.env.APP_URL as string,
+    passwordResetTtlMin: Number(process.env.PASSWORD_RESET_TTL_MIN)
 };
