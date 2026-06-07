@@ -29,11 +29,11 @@ def main():
 
     print(
         f"Predictions generated: "
-        f"{len(prediction_result['predicciones'])}"
+        f"{len(prediction_result['predictions'])}"
     )
 
     print(
-        prediction_result["predicciones"][:3]
+        prediction_result["predictions"][:3]
     )
 
     print("\n=== MODELS TEST ===")

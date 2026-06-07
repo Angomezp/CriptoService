@@ -18,6 +18,8 @@ from ml_service.ml.feature_helper import FeatureHelper
 
 from ml_service.exceptions.app_exception import AppException
 
+from ml_service.config.env import config
+
 
 class ModelTrainer:
 
@@ -27,7 +29,7 @@ class ModelTrainer:
 
         self.feature_helper =  FeatureHelper()
 
-        self.minimum_data_points = 200
+        self.minimum_data_points = config.MINIMUM_DATA_POINTS
 
     def train( self,
         symbol: str,
@@ -54,12 +56,12 @@ class ModelTrainer:
 
             if model_params is None:
                 model_params = {
-                    "n_estimators": 100,
-                    "max_depth": 4,
-                    "learning_rate": 0.05,
-                    "objective": "reg:squarederror",
-                    "random_state": 42,
-                    "n_jobs": 1
+                    "n_estimators": config.DEFAULT_N_ESTIMATORS,
+                    "max_depth": config.DEFAULT_MAX_DEPTH,
+                    "learning_rate": config.DEFAULT_LEARNING_RATE,
+                    "objective": config.DEFAULT_OBJECTIVE,
+                    "random_state": config.DEFAULT_RANDOM_STATE,
+                    "n_jobs": config.DEFAULT_N_JOBS
                 }
 
             model = MultiOutputRegressor(
@@ -81,13 +83,13 @@ class ModelTrainer:
 
             rmse = float( mean_squared_error( y_test, predictions ) ** 0.5 )
 
-            Path( "ml_service/models" ).mkdir( exist_ok=True, parents=True )
+            Path( config.MODEL_DIRECTORY ).mkdir( exist_ok=True, parents=True )
 
             training_date = datetime.now()
 
             file_date = training_date.strftime( "%Y-%m-%d_%H-%M-%S" )
 
-            model_path =  f"ml_service/models/{symbol.lower()}_{file_date}_predictor.joblib" 
+            model_path =  f"{config.MODEL_DIRECTORY}/{symbol.lower()}_{file_date}_predictor.joblib" 
 
             joblib.dump( model, model_path )
 

@@ -9,6 +9,8 @@ from ml_service.ml.model_predictor import ModelPredictor
 from ml_service.ml.feature_helper import FeatureHelper
 from ml_service.exceptions.app_exception import AppException
 
+from ml_service.config.env import config
+
 class ModelsService:
 
     def __init__(self):
@@ -20,8 +22,6 @@ class ModelsService:
         self.trainer = ModelTrainer()
         self.predictor = ModelPredictor()
         self.features_helper = FeatureHelper()
-
-        self.training_cooldown = timedelta(days=1)
 
     def train_model( self,
         symbol: str,
@@ -36,11 +36,12 @@ class ModelsService:
 
                 hours_since_training = datetime.now() - latest_model.training_date
             
-                if hours_since_training < self.training_cooldown:
+                if hours_since_training < config.TRAINING_COOLDOWN_HOURS * timedelta(hours=1):
 
                     return {
+                        "symbol": symbol,
                         "trained": False,
-                        "message": f"El modelo de {symbol} ya fue entrenado recientemente",
+                        "message": f"Model for {symbol} was trained recently",
                         "last_training": latest_model.training_date,
                         "hours_since_training": round(hours_since_training.total_seconds() / 3600, 3)
                     }
@@ -70,8 +71,13 @@ class ModelsService:
             return {
                 "trained": True,
                 "symbol": symbol,
+                "message": f"Model trained for {symbol} correctly",
                 "new_records": inserted,
-                "training": training_result
+                "last_training": training_result["training_date"],
+                "observations": training_result["observations"],
+                "mae": training_result["mae"],
+                "rmse": training_result["rmse"],
+                "model_path": training_result["model_path"]
             }
 
         except AppException:
@@ -111,8 +117,8 @@ class ModelsService:
                 prediction = float(prediction)
 
                 prediction_results.append({
-                    "hour": hour,
-                    "percentage_change": round(prediction * 100,4),
+                    "prediction_hour": hour,
+                    "percentage_variation": round(prediction * 100,4),
                     "estimated_price": round(current_price * (1 + prediction),7)
                 })
 
@@ -121,7 +127,7 @@ class ModelsService:
                 "current_price": current_price,
                 "model": metadata.model_name,
                 "version": metadata.model_version,
-                "predicciones": prediction_results
+                "predictions": prediction_results
             }
 
         except AppException:

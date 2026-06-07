@@ -19,5 +19,25 @@ class Config:
     DB_HOST = os.getenv("DB_HOST", "")
     DB_PORT = os.getenv("DB_PORT", "")
 
+    MODEL_DIRECTORY = "ml_service/models"
+
+    MINIMUM_DATA_POINTS = 200
+
+    TRAINING_COOLDOWN_HOURS = 24
+
+    # Default Hyperparameters for the XGBoost model
+
+    DEFAULT_N_ESTIMATORS = 100
+
+    DEFAULT_MAX_DEPTH = 4
+
+    DEFAULT_LEARNING_RATE = 0.05
+
+    DEFAULT_RANDOM_STATE = 42
+
+    DEFAULT_N_JOBS = 1
+    
+    DEFAULT_OBJECTIVE = "reg:squarederror"
+
 
 config = Config()
