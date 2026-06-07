@@ -20,27 +20,27 @@ class CryptoPriceRepository:
         try:
             last_record = (
                 session.query( CryptoPrice )
-                    .filter( CryptoPrice.simbolo == symbol )
-                    .order_by( CryptoPrice.fecha_hora.desc() )
+                    .filter( CryptoPrice.symbol == symbol )
+                    .order_by( CryptoPrice.time_stamp.desc() )
                     .first()
             )
 
-            last_date = last_record.fecha_hora if last_record else None
+            last_date = last_record.time_stamp if last_record else None
 
             entities = []
 
             for _, row in dataframe.iterrows():
 
-                if (last_date is not None and row["fecha_hora"] <= last_date ):
+                if (last_date is not None and row["time_stamp"] <= last_date ):
                     continue
 
                 entities.append(
                     CryptoPrice(
-                        simbolo = symbol,
-                        fecha_hora = row["fecha_hora"],
-                        precio = row["precio"],
-                        capitalizacion_mercado = row["capitalizacion_mercado"],
-                        volumen = row["volumen"]
+                        symbol = symbol,
+                        time_stamp = row["time_stamp"],
+                        price = row["price"],
+                        market_cap = row["market_cap"],
+                        volume_24h = row["volume_24h"]
                     )
                 )
 
@@ -53,7 +53,7 @@ class CryptoPriceRepository:
         except SQLAlchemyError as e:
             session.rollback()
 
-            raise DatabaseException( f"Error guardando precios: {str(e)}")
+            raise DatabaseException( f"Error saving prices: {str(e)}")
 
         finally:
             session.close()
@@ -66,13 +66,13 @@ class CryptoPriceRepository:
         try:
             return (
                 session.query( CryptoPrice )
-                    .filter( CryptoPrice.simbolo == symbol )
-                    .order_by( CryptoPrice.fecha_hora.asc() )
+                    .filter( CryptoPrice.symbol == symbol )
+                    .order_by( CryptoPrice.time_stamp.asc() )
                     .all()
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando histórico: {str(e)}" )
+            raise DatabaseException( f"Error consulting historical data: {str(e)}" )
 
         finally:
             session.close()
@@ -86,24 +86,24 @@ class CryptoPriceRepository:
         try:
             records = (
                 session.query(CryptoPrice)
-                    .filter( CryptoPrice.simbolo == symbol )
-                    .order_by( CryptoPrice.fecha_hora.desc() )
+                    .filter( CryptoPrice.symbol == symbol )
+                    .order_by( CryptoPrice.time_stamp.desc() )
                     .limit(limit)
                     .all()
             )
             return pd.DataFrame([
                 {
-                    "fecha_hora": record.fecha_hora,
-                    "precio": float(record.precio),
-                    "capitalizacion_mercado": float(record.capitalizacion_mercado) if record.capitalizacion_mercado is not None else None, 
-                    "volumen": float(record.volumen) if record.volumen is not None else None
+                    "timestamp": record.time_stamp,
+                    "price": float(record.price),
+                    "market_cap": float(record.market_cap) if record.market_cap is not None else None, 
+                    "volume_24h": float(record.volume_24h) if record.volume_24h is not None else None
                 }
                 for record in records
             ])
 
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando registros: {str(e)}" )
+            raise DatabaseException( f"Error consulting records: {str(e)}" )
 
         finally:
             session.close()
@@ -117,17 +117,17 @@ class CryptoPriceRepository:
         try:
             records = (
                 session.query(CryptoPrice)
-                    .filter( CryptoPrice.simbolo == symbol )
-                    .order_by( CryptoPrice.fecha_hora.asc() )
+                    .filter( CryptoPrice.symbol == symbol )
+                    .order_by( CryptoPrice.time_stamp.asc() )
                     .all()
             )
 
             data = [
                 {
-                    "fecha_hora": record.fecha_hora,
-                    "precio": float(record.precio),
-                    "capitalizacion_mercado":  float(record.capitalizacion_mercado) if record.capitalizacion_mercado is not None else None,
-                    "volumen": float(record.volumen) if record.volumen is not None else None
+                    "timestamp": record.time_stamp,
+                    "price": float(record.price),
+                    "market_cap":  float(record.market_cap) if record.market_cap is not None else None,
+                    "volume_24h": float(record.volume_24h) if record.volume_24h is not None else None
                 }
                 for record in records
             ]
@@ -135,7 +135,7 @@ class CryptoPriceRepository:
             return pd.DataFrame(data)
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error obteniendo datos de entrenamiento: {str(e)}"  )
+            raise DatabaseException( f"Error consulting training data: {str(e)}"  )
 
         finally:
             session.close()

@@ -20,8 +20,8 @@ def main():
     active_model = service.get_active_model(symbol)
 
     print(f"ID: {active_model.id}")
-    print(f"Model: {active_model.nombre}")
-    print(f"Path: {active_model.ruta_modelo}")
+    print(f"Model: {active_model.model_name}")
+    print(f"Path: {active_model.model_path}")
 
     print("\n=== PREDICTION TEST ===")
 

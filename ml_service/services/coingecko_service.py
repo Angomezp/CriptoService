@@ -49,13 +49,13 @@ class CoinGeckoService:
             return self._make_dataframe(data)
 
         except requests.Timeout as e:
-            raise ExternalServiceException( f"Tiempo de espera agotado al conectar con CoinGecko: {str(e)}" )
+            raise ExternalServiceException( f"Waiting time exceeded when connecting to CoinGecko: {str(e)}" )
         
         except requests.HTTPError as e:
-            raise ExternalServiceException( f"Error HTTP al conectar con CoinGecko: {str(e)}" )
+            raise ExternalServiceException( f"HTTP error when connecting to CoinGecko: {str(e)}" )
         
         except requests.RequestException as e:
-            raise ExternalServiceException( f"Error al conectar con CoinGecko: {str(e)}" )
+            raise ExternalServiceException( f"Error when connecting to CoinGecko: {str(e)}" )
 
 
     def _make_dataframe(self, 
@@ -63,7 +63,7 @@ class CoinGeckoService:
     ) -> pd.DataFrame:
 
         if not data.get("prices") or not data.get("market_caps") or not data.get("total_volumes"):
-            raise ExternalServiceException( "La respuesta de CoinGecko no contiene los campos esperados." )
+            raise ExternalServiceException( "The response from CoinGecko does not contain the expected fields." )
         
         prices = data["prices"]
         market_caps = data["market_caps"]
@@ -75,17 +75,17 @@ class CoinGeckoService:
             
             price_timestamp, price = price_data
             _, market_cap = market_cap_data
-            _, volume = volume_data
+            _, volume_24h = volume_data
 
             rows.append({
-                "fecha_hora": pd.to_datetime( price_timestamp, unit="ms" ),
-                "precio": price,
-                "capitalizacion_mercado": market_cap,
-                "volumen": volume
+                "time_stamp": pd.to_datetime( price_timestamp, unit="ms" ),
+                "price": price,
+                "market_cap": market_cap,
+                "volume_24h": volume_24h
             })
         df = pd.DataFrame(rows)
 
-        return df.sort_values( by="fecha_hora" ).reset_index( drop=True )
+        return df.sort_values( by="time_stamp" ).reset_index( drop=True )
 
 
 

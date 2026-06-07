@@ -6,15 +6,15 @@ from ml_service.exceptions.app_exception import AppException
 class FeatureHelper:
 
     FEATURE_COLUMNS = [
-        "precio",
-        "retorno_1h",
-        "retorno_6h",
-        "retorno_12h",
-        "retorno_24h",
-        "cambio_volumen_24h",
+        "price",
+        "1h_return",
+        "6h_return",
+        "12h_return",
+        "24h_return",
+        "24h_volume_change",
         "sma_24",
-        "hora",
-        "dia_semana"
+        "hour",
+        "day_of_week"
     ] 
 
     def build_dataset( self,
@@ -23,9 +23,9 @@ class FeatureHelper:
 
         try:
             required_columns = [
-                "fecha_hora",
-                "precio",
-                "volumen"
+                "timestamp",
+                "price",
+                "volume_24h"
             ]
 
             missing = [
@@ -35,42 +35,42 @@ class FeatureHelper:
             ]
 
             if missing:
-                raise AppException( f"Columnas faltantes: {missing}" )
+                raise AppException( f"Missing columns: {missing}" )
 
             df = dataframe.copy()
 
-            df = df.sort_values( by="fecha_hora" )
+            df = df.sort_values( by="timestamp" )
 
-            df["fecha_hora"] = pd.to_datetime( df["fecha_hora"] )
+            df["timestamp"] = pd.to_datetime( df["timestamp"] )
 
-            df["hora"] = df["fecha_hora"].dt.hour 
+            df["hour"] = df["timestamp"].dt.hour 
 
-            df["dia_semana"] = df["fecha_hora"].dt.dayofweek 
+            df["day_of_week"] = df["timestamp"].dt.dayofweek 
 
-            df["retorno_1h"] = df["precio"].pct_change(1) 
+            df["1h_return"] = df["price"].pct_change(1) 
 
-            df["retorno_6h"] = df["precio"].pct_change(6) 
+            df["6h_return"] = df["price"].pct_change(6) 
 
-            df["retorno_12h"] = df["precio"].pct_change(12) 
+            df["12h_return"] = df["price"].pct_change(12) 
 
-            df["retorno_24h"] = df["precio"].pct_change(24) 
+            df["24h_return"] = df["price"].pct_change(24) 
 
-            df["cambio_volumen_24h"] = df["volumen"].pct_change(24) 
+            df["24h_volume_change"] = df["volume_24h"].pct_change(24) 
 
-            df["sma_24"] = df["precio"].rolling(24).mean() 
+            df["sma_24"] = df["price"].rolling(24).mean() 
 
             for horizon in range(1, 25):
-                df[f"target_{horizon}h"] = df["precio"].shift(-horizon).sub(df["precio"]).div(df["precio"]) 
+                df[f"target_{horizon}h"] = df["price"].shift(-horizon).sub(df["price"]).div(df["price"]) 
 
             df = df.dropna()
 
             if df.empty:
-                raise AppException( "El dataset quedó vacío después del procesamiento de features" )
+                raise AppException( "The dataset is empty after feature processing" )
 
             return df
         
         except Exception as e:
-            raise AppException( f"Error construyendo dataset: {str(e)}" )
+            raise AppException( f"Error building dataset: {str(e)}" )
     
     def split_features_targets( self,
         dataframe: pd.DataFrame
@@ -82,7 +82,7 @@ class FeatureHelper:
             return X, y
         
         except Exception as e:
-            raise AppException( f"Error separando features y targets: {str(e)}" )
+            raise AppException( f"Error separating features and targets: {str(e)}" )
         
     
     def build_prediction_features( self,
@@ -92,32 +92,32 @@ class FeatureHelper:
         try:
             df = dataframe.copy()
 
-            df = df.sort_values( by="fecha_hora" )
+            df = df.sort_values( by="timestamp" )
 
-            df["fecha_hora"] = pd.to_datetime( df["fecha_hora"] ) 
+            df["timestamp"] = pd.to_datetime( df["timestamp"] ) 
 
-            df["hora"] = df["fecha_hora"].dt.hour 
+            df["hour"] = df["timestamp"].dt.hour 
 
-            df["dia_semana"] = df["fecha_hora"].dt.dayofweek 
+            df["day_of_week"] = df["timestamp"].dt.dayofweek 
 
-            df["retorno_1h"] = df["precio"].pct_change(1) 
+            df["1h_return"] = df["price"].pct_change(1) 
 
-            df["retorno_6h"] = df["precio"].pct_change(6) 
+            df["6h_return"] = df["price"].pct_change(6) 
 
-            df["retorno_12h"] = df["precio"].pct_change(12) 
+            df["12h_return"] = df["price"].pct_change(12) 
 
-            df["retorno_24h"] = df["precio"].pct_change(24) 
+            df["24h_return"] = df["price"].pct_change(24) 
 
-            df["cambio_volumen_24h"] = df["volumen"].pct_change(24) 
+            df["24h_volume_change"] = df["volume_24h"].pct_change(24) 
 
-            df["sma_24"] = df["precio"].rolling(24).mean()
+            df["sma_24"] = df["price"].rolling(24).mean()
 
             df = df.dropna()
 
             if df.empty:
-                raise AppException( "El dataset quedó vacío después del procesamiento de features" )
+                raise AppException( "The dataset is empty after feature processing" )
 
             return df.tail(1)[ self.FEATURE_COLUMNS ]
         
         except Exception as e:
-            raise AppException( f"Error construyendo features para predicción: {str(e)}" )
+            raise AppException( f"Error building prediction features: {str(e)}" )

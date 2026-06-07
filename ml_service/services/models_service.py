@@ -34,15 +34,15 @@ class ModelsService:
 
             if latest_model:
 
-                hours_since_training = datetime.now() - latest_model.fecha_entrenamiento
+                hours_since_training = datetime.now() - latest_model.training_date
             
                 if hours_since_training < self.training_cooldown:
 
                     return {
                         "trained": False,
                         "message": f"El modelo de {symbol} ya fue entrenado recientemente",
-                        "last_training": latest_model.fecha_entrenamiento,
-                        "hours_since_training": hours_since_training.total_seconds() / 3600
+                        "last_training": latest_model.training_date,
+                        "hours_since_training": round(hours_since_training.total_seconds() / 3600, 3)
                     }
 
             historical_data = self.coingecko.get_market_chart( coin_gecko_id )
@@ -51,17 +51,19 @@ class ModelsService:
 
             training_result = self.trainer.train( symbol, model_params )
 
+            self.model_repo.deactivate_models_by_symbol( symbol )
+
             metadata = ModelMetadata(
-                nombre=f"{symbol} Predictor",
-                algoritmo="XGBoost",
-                version="1.0",
-                ruta_modelo=training_result["ruta_modelo"],
+                model_name=f"{symbol} Predictor",
+                model_algorithm="XGBoost",
+                model_version="1.0",
+                model_path=training_result["model_path"],
                 mae=training_result["mae"],
                 rmse=training_result["rmse"],
-                observaciones=training_result["observaciones"],
-                activo=True,
-                fecha_entrenamiento=training_result["fecha_entrenamiento"],
-                simbolo=symbol
+                observations=training_result["observations"],
+                active=True,
+                training_date=training_result["training_date"],
+                symbol=symbol
             )
             self.model_repo.save(metadata)
 
@@ -76,7 +78,7 @@ class ModelsService:
             raise
 
         except Exception as e:
-            raise AppException( f"Error entrenando modelo para {symbol}: {str(e)}" )
+            raise AppException( f"Error training model for {symbol}: {str(e)}" )
     
     def predict( self,
         symbol: str
@@ -86,21 +88,21 @@ class ModelsService:
             metadata = self.model_repo.get_latest_active_model(symbol)
 
             if metadata is None:
-                raise AppException(f"No existe modelo para {symbol}")
+                raise AppException(f"There is no active model for {symbol}")
 
             historical_df = self.crypto_repo.find_last_records(symbol=symbol,limit=50)
         
             if historical_df.empty:
-                raise AppException(f"No existen datos para {symbol}")
+                raise AppException(f"No data available for {symbol}")
 
             X = self.features_helper.build_prediction_features(historical_df)
 
             if X.empty:
-                raise AppException("No fue posible generar features")
+                raise AppException("Not possible to build features for prediction")
 
-            predictions = self.predictor.predict(metadata.ruta_modelo,X)[0]
+            predictions = self.predictor.predict(metadata.model_path,X)[0]
 
-            current_price = float(historical_df.iloc[-1]["precio"])
+            current_price = float(historical_df.iloc[-1]["price"])
 
             prediction_results = []
 
@@ -109,16 +111,16 @@ class ModelsService:
                 prediction = float(prediction)
 
                 prediction_results.append({
-                    "hora": hour,
-                    "variacion_porcentual": round(prediction * 100,4),
-                    "precio_estimado": round(current_price * (1 + prediction),2)
+                    "hour": hour,
+                    "percentage_change": round(prediction * 100,4),
+                    "estimated_price": round(current_price * (1 + prediction),7)
                 })
 
             return {
-                "simbolo": symbol,
-                "precio_actual": current_price,
-                "modelo": metadata.nombre,
-                "version": metadata.version,
+                "symbol": symbol,
+                "current_price": current_price,
+                "model": metadata.model_name,
+                "version": metadata.model_version,
                 "predicciones": prediction_results
             }
 
@@ -126,8 +128,25 @@ class ModelsService:
             raise
 
         except Exception as e:
-            raise AppException(f"Error generando predicción: {str(e)}")
-    
+            raise AppException(f"Error generating prediction: {str(e)}")
+        
+    def predict_hour( self,
+        symbol: str,
+        hour: int
+    ):
+        if hour < 1 or hour > 24:
+            raise AppException( "The hour must be between 1 and 24" )
+        
+        prediction_data = self.predict(symbol)
+
+        return {
+            "symbol": symbol,
+            "current_price": prediction_data["current_price"],
+            "prediction": prediction_data["predictions"][hour-1],
+            "model": prediction_data["model"],
+            "version": prediction_data["version"]
+        }
+
     def get_models(self, symbol: str | None = None):
         return self.model_repo.get_all_models(symbol)
     

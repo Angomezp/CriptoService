@@ -12,7 +12,7 @@ class ModelPredictor:
     ):
         try:
             if not Path(model_path).exists():
-                raise AppException( f"No existe el modelo: {model_path}" )
+                raise AppException( f"Model not found: {model_path}" )
 
             return joblib.load( model_path )
 
@@ -20,7 +20,7 @@ class ModelPredictor:
             raise
 
         except Exception as e:
-            raise AppException( f"Error cargando modelo: {str(e)}" )
+            raise AppException( f"Error loading model: {str(e)}" )
 
     def predict( self,
         model_path: str,
@@ -35,4 +35,4 @@ class ModelPredictor:
             raise
 
         except Exception as e:
-            raise AppException( f"Error realizando predicción: {str(e)}" )
+            raise AppException( f"Error making prediction: {str(e)}" )

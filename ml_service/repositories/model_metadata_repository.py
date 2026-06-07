@@ -27,7 +27,7 @@ class ModelMetadataRepository:
         except SQLAlchemyError as e:
             session.rollback()
             
-            raise DatabaseException( f"Error guardando metadata del modelo: {str(e)}" )
+            raise DatabaseException( f"Error saving model metadata: {str(e)}" )
 
         finally:
             session.close()
@@ -39,13 +39,13 @@ class ModelMetadataRepository:
         try:
             return ( 
                 session.query(ModelMetadata)
-                    .filter( ModelMetadata.activo.is_(True) )
-                    .order_by( ModelMetadata.fecha_entrenamiento.desc() )
+                    .filter( ModelMetadata.active.is_(True) )
+                    .order_by( ModelMetadata.training_date.desc() )
                     .all()
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando modelos activos: {str(e)}" )
+            raise DatabaseException( f"Error consulting active models: {str(e)}" )
 
         finally:
             session.close()
@@ -64,7 +64,7 @@ class ModelMetadataRepository:
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando modelo: {str(e)}" )
+            raise DatabaseException( f"Error consulting model: {str(e)}" )
 
         finally:
             session.close()
@@ -78,13 +78,13 @@ class ModelMetadataRepository:
         try:
             return (
                 session.query(ModelMetadata)
-                    .order_by( ModelMetadata.fecha_entrenamiento.desc() )
-                    .filter( func.lower(ModelMetadata.simbolo) == func.lower(symbol) if symbol else True )
+                    .order_by( ModelMetadata.training_date.desc() )
+                    .filter( func.lower(ModelMetadata.symbol) == func.lower(symbol) if symbol else True )
                     .all()
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando modelos: {str(e)}" )
+            raise DatabaseException( f"Error consulting models: {str(e)}" )
         
         finally:
             session.close()
@@ -97,13 +97,13 @@ class ModelMetadataRepository:
         try:
             return (
                 session.query(ModelMetadata)
-                    .filter( ModelMetadata.activo.is_(True), func.lower(ModelMetadata.simbolo) == func.lower(symbol) )
-                    .order_by( ModelMetadata.fecha_entrenamiento.desc() )
+                    .filter( ModelMetadata.active.is_(True), func.lower(ModelMetadata.symbol) == func.lower(symbol) )
+                    .order_by( ModelMetadata.training_date.desc() )
                     .first()
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando modelo activo: {str(e)}" )
+            raise DatabaseException( f"Error consulting latest active model: {str(e)}" )
 
         finally:
             session.close()
@@ -117,13 +117,36 @@ class ModelMetadataRepository:
         try:
             return (
                 session.query(ModelMetadata)
-                    .filter( ModelMetadata.activo.is_(True), func.lower(ModelMetadata.simbolo) == func.lower(symbol) )
-                    .order_by( ModelMetadata.fecha_entrenamiento.desc() )
+                    .filter( ModelMetadata.active.is_(True), func.lower(ModelMetadata.symbol) == func.lower(symbol) )
+                    .order_by( ModelMetadata.training_date.desc() )
                     .all()
             )
 
         except SQLAlchemyError as e:
-            raise DatabaseException( f"Error consultando modelos activos: {str(e)}" )
+            raise DatabaseException( f"Error consulting active models: {str(e)}" )
+
+        finally:
+            session.close()
+
+    def deactivate_models_by_symbol(
+        self,
+        symbol: str
+    ):
+
+        session = Database.get_session()
+        try:
+            (
+                session.query(ModelMetadata)
+                    .filter( ModelMetadata.symbol == symbol )
+                    .update( {"active": False} )
+            )
+
+            session.commit()
+
+        except SQLAlchemyError as e:
+            session.rollback()
+
+            raise DatabaseException( f"Error deactivating models: {str(e)}" )
 
         finally:
             session.close()

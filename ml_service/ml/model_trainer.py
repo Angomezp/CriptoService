@@ -38,15 +38,15 @@ class ModelTrainer:
             historical_df = self.crypto_repository.get_training_data( symbol )
 
             if historical_df.empty:
-                raise AppException( f"No existen datos históricos para {symbol}" )
+                raise AppException( f"No historical data found for {symbol}" )
             
             if len(historical_df) < self.minimum_data_points:
-                raise AppException( f"No hay suficientes datos para entrenar un modelo para {symbol}. Se requieren al menos {self.minimum_data_points} registros." )
+                raise AppException( f"Not enough data to train a model for {symbol}. At least {self.minimum_data_points} records are required." )
 
             dataset = self.feature_helper.build_dataset( historical_df )
 
             if dataset.empty:
-                raise AppException( "No fue posible generar el dataset de entrenamiento" )
+                raise AppException( "The dataset is empty after feature processing" )
 
             X, y =  self.feature_helper.split_features_targets( dataset ) 
 
@@ -92,19 +92,20 @@ class ModelTrainer:
             joblib.dump( model, model_path )
 
             if not Path(model_path).exists():
-                raise AppException( "No fue posible guardar el modelo entrenado" )
+                raise AppException( "Not possible to save the trained model" )
 
 
             return {
                 "symbol": symbol,
-                "observaciones": len(dataset),
+                "observations": len(dataset),
                 "mae": mae,
                 "rmse": rmse,
-                "ruta_modelo": model_path,
-                "fecha_entrenamiento": training_date
+                "model_path": model_path,
+                "training_date": training_date,
+
             }
         
         except AppException as e:
             raise e
         except Exception as e:
-            raise AppException( f"Error durante el entrenamiento para {symbol}: {str(e)}" )
+            raise AppException( f"Error during training for {symbol}: {str(e)}" )

@@ -1,54 +1,54 @@
-CREATE TABLE precios_criptomonedas (
+CREATE TABLE crypto_prices (
     id BIGSERIAL PRIMARY KEY,
 
-    simbolo VARCHAR(20) NOT NULL,
+    symbol VARCHAR(20) NOT NULL,
 
-    fecha_hora TIMESTAMP NOT NULL,
+    time_stamp TIMESTAMP NOT NULL,
 
-    precio NUMERIC(20,8) NOT NULL,
+    price NUMERIC(20,8) NOT NULL,
 
-    capitalizacion_mercado NUMERIC(30,2),
+    market_cap NUMERIC(30,2),
 
-    volumen NUMERIC(30,2),
+    volume_24h NUMERIC(30,2),
 
-    CONSTRAINT uq_precio_criptomoneda
-        UNIQUE (simbolo, fecha_hora)
+    CONSTRAINT uq_symbol_time_stamp
+        UNIQUE (symbol, time_stamp)
 );
 
-CREATE INDEX idx_precio_simbolo
-    ON precios_criptomonedas(simbolo);
+CREATE INDEX idx_price_symbol
+    ON crypto_prices(symbol);
 
-CREATE INDEX idx_precio_simbolo_fecha
-    ON precios_criptomonedas(simbolo, fecha_hora);
+CREATE INDEX idx_price_symbol_time_stamp
+    ON crypto_prices(symbol, time_stamp);
 
 
-CREATE TABLE modelos (
+CREATE TABLE models_metadata (
     id SERIAL PRIMARY KEY,
 
-    nombre VARCHAR(100) NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
 
-    algoritmo VARCHAR(50) NOT NULL,
+    model_algorithm VARCHAR(50) NOT NULL,
 
-    version VARCHAR(20) NOT NULL,
+    model_version VARCHAR(20) NOT NULL,
 
     mae NUMERIC(15,6),
 
     rmse NUMERIC(15,6),
 
-    observaciones INTEGER,
+    observations INTEGER,
 
-    ruta_modelo VARCHAR(255) NOT NULL,
+    model_path VARCHAR(255) NOT NULL,
 
-    activo BOOLEAN NOT NULL DEFAULT FALSE,
+    active BOOLEAN NOT NULL DEFAULT FALSE,
 
-    simbolo VARCHAR(20) NOT NULL,
+    symbol VARCHAR(20) NOT NULL,
 
-    fecha_entrenamiento TIMESTAMP NOT NULL
+    training_date TIMESTAMP NOT NULL
         DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_modelo_activo
-    ON modelos(activo);
+CREATE INDEX idx_model_metadata_active
+    ON models_metadata(active);
 
-CREATE INDEX idx_modelo_simbolo_activo
-    ON modelos(simbolo, activo);
+CREATE INDEX idx_model_metadata_symbol_active
+    ON models_metadata(symbol, active);

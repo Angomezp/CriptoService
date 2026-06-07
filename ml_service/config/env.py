@@ -9,6 +9,8 @@ class Config:
     # Configuración de la API de CoinGecko
     COINGECKO_API_URL = os.getenv("COINGECKO_API_URL", "")
     COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY", "")
+    ML_SV_PORT = int(os.getenv("ML_SV_PORT", 8000))
+    ML_SV_HOST = os.getenv("ML_SV_HOST", "127.0.0.1")
 
     DATABASE_URL = os.getenv("DATABASE_URL", "")
     DB_USER = os.getenv("DB_USER", "")
