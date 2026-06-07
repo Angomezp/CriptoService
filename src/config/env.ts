@@ -13,10 +13,12 @@ interface EnvConfig {
     encryptionKey: string;
     jwtSecret: string;
     jwtMfaSecret: string;
+    maxIntentosLogin: number;
+    bloqueoMinutos: number;
 }
 
 function validateEnv() {
-    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME','DB_TYPE' ,'ENCRYPTION_KEY', 'JWT_SECRET', 'JWT_MFA_SECRET'];
+    const requiredEnvVars = ['SV_PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME','DB_TYPE' ,'ENCRYPTION_KEY', 'JWT_SECRET', 'JWT_MFA_SECRET', 'MAX_INTENTOS_LOGIN', 'BLOQUEO_MINUTOS'];
     const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
     if (missingEnvVars.length > 0) {
@@ -36,5 +38,7 @@ export const env: EnvConfig = {
     encryptionKey: process.env.ENCRYPTION_KEY as string,
     jwtSecret: process.env.JWT_SECRET as string,
     jwtMfaSecret: process.env.JWT_MFA_SECRET as string,
-    dbType: process.env.DB_TYPE as string
+    dbType: process.env.DB_TYPE as string,
+    maxIntentosLogin: Number(process.env.MAX_INTENTOS_LOGIN),
+    bloqueoMinutos: Number(process.env.BLOQUEO_MINUTOS)
 };

@@ -25,5 +25,26 @@ export default class UserRepository {
         return await this.userRepo.save(user);
     }
     
+    async incrementarIntentos(id: number): Promise<User> {
+        const user = await this.findById(id);
+        if (!user) throw new Error('Usuario no encontrado');
+        user.intentosFallidos += 1;
+        return await this.userRepo.save(user);
+    }
+
+    async bloquearUsuario(id: number, minutos: number): Promise<User> {
+        const user = await this.findById(id);
+        if (!user) throw new Error('Usuario no encontrado');
+        user.bloqueadoHasta = new Date(Date.now() + minutos * 60 * 1000);
+        return await this.userRepo.save(user);
+    }
+
+    async resetearIntentos(id: number): Promise<User> {
+        const user = await this.findById(id);
+        if (!user) throw new Error('Usuario no encontrado');
+        user.intentosFallidos = 0;
+        user.bloqueadoHasta = null;
+        return await this.userRepo.save(user);
+    }
 
 }

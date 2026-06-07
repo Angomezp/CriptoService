@@ -4,6 +4,7 @@ import { AppError, ConflictError, ValidationError } from '../config/http.errors.
 import * as jwtHandler from '../security/jwt.handler.js';
 import * as totpHandler from '../security/totp.handler.js';
 import * as encryptionHandler from '../security/encryption.js';
+import { env } from '../config/env.js';
 
 export default class AuthService {
 
@@ -42,27 +43,63 @@ export default class AuthService {
     public async login(correo: string, password: string) {
         try {
             const user = await this.userRepo.findByEmail(correo);
+
             if (!user) {
-                throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
+                throw new AppError('Credenciales inválidas', 401, 'INVALID_CREDENTIALS');
             }
+
+            if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
+                const minutosRestantes = Math.ceil(
+                    (user.bloqueadoHasta.getTime() - Date.now()) / 60000
+                );
+                throw new AppError(
+                    `Cuenta bloqueada temporalmente. Intenta de nuevo en ${minutosRestantes} minutos.`,
+                    423,
+                    'ACCOUNT_LOCKED'
+                );
+            }
+
             const passwordValid = await verificar(password, user.passwordHash);
+
             if (!passwordValid) {
-                throw new AppError('Contraseña incorrecta', 401, 'INVALID_PASSWORD');
+                await this.userRepo.incrementarIntentos(user.idUsuario);
+                const intentosActuales = user.intentosFallidos + 1;
+
+                if (intentosActuales >= env.maxIntentosLogin) {
+                    await this.userRepo.bloquearUsuario(user.idUsuario, env.bloqueoMinutos);
+                    throw new AppError(
+                        `Cuenta bloqueada por múltiples intentos fallidos. Intenta de nuevo en ${env.bloqueoMinutos} minutos.`,
+                        423,
+                        'ACCOUNT_LOCKED'
+                    );
+                }
+
+                throw new AppError(
+                    `Credenciales inválidas. Intentos restantes: ${env.maxIntentosLogin - intentosActuales}`,
+                    401,
+                    'INVALID_CREDENTIALS'
+                );
             }
-            
+
+            await this.userRepo.resetearIntentos(user.idUsuario);
+
             if (user.mfaEnabled) {
                 const mfaToken = jwtHandler.generarMfaToken(user.idUsuario);
-                return { mfaToken: mfaToken, message: 'Contraseña correcta, ingresa el código MFA' , mfa_requerido : true};
+                return {
+                    mfaToken: mfaToken,
+                    message: 'Contraseña correcta, ingresa el código MFA',
+                    mfa_requerido: true
+                };
             }
 
             const token = jwtHandler.generarToken(user.idUsuario);
-
-            return { message: 'Inicio de sesión exitoso', token: token, mfa_requerido : false};
+            return { message: 'Inicio de sesión exitoso', token: token, mfa_requerido: false };
 
         } catch (error: any) {
             if (error instanceof AppError) throw error;
             throw new AppError('Error al iniciar sesión', 500, 'LOGIN_ERROR', {
-                originalMessage: (error as Error)?.message});
+                originalMessage: (error as Error)?.message
+            });
         }
     }
 
