@@ -48,6 +48,66 @@ Registra cada inversión individual dentro de un portafolio. Almacena la criptom
 
 ---
 
+
+## Tabla: `crypto_prices`
+
+Almacena el histórico de precios de las criptomonedas utilizado para entrenamiento y generación de predicciones. Cada registro representa una observación de mercado en un instante específico.
+
+| Campo      | Tipo de dato | Longitud | PK / FK | Restricciones  | Descripción                                                           |
+| ---------- | ------------ | -------- | ------- | -------------- | --------------------------------------------------------------------- |
+| id         | bigserial    | -        | PK      | NOT NULL, AUTO | Identificador único del registro de precio. Se autoincrementa.        |
+| symbol     | varchar      | 20       | -       | NOT NULL       | Símbolo de la criptomoneda. Ejemplo: BTC, ETH, ADA.                   |
+| time_stamp | timestamp    | -        | -       | NOT NULL       | Fecha y hora correspondiente al precio registrado.                    |
+| price      | numeric      | 20,8     | -       | NOT NULL       | Precio de la criptomoneda en el instante registrado.                  |
+| market_cap | numeric      | 30,2     | -       | NULL           | Capitalización de mercado de la criptomoneda al momento del registro. |
+| volume_24h | numeric      | 30,2     | -       | NULL           | Volumen de negociación acumulado durante las últimas 24 horas.        |
+
+### Restricciones adicionales
+
+* Restricción única sobre `(symbol, time_stamp)` para evitar registros duplicados de una misma criptomoneda en la misma fecha y hora.
+
+### Índices
+
+* `idx_price_symbol`: optimiza búsquedas por símbolo.
+* `idx_price_symbol_time_stamp`: optimiza consultas históricas por símbolo y fecha.
+
+---
+
+## Tabla: `models_metadata`
+
+Almacena la información de los modelos de aprendizaje automático entrenados para cada criptomoneda, incluyendo métricas de desempeño, ubicación del archivo y estado de activación.
+
+| Campo           | Tipo de dato | Longitud | PK / FK | Restricciones                       | Descripción                                                                |
+| --------------- | ------------ | -------- | ------- | ----------------------------------- | -------------------------------------------------------------------------- |
+| id              | serial       | -        | PK      | NOT NULL, AUTO                      | Identificador único del modelo entrenado.                                  |
+| model_name      | varchar      | 100      | -       | NOT NULL                            | Nombre descriptivo del modelo.                                             |
+| model_algorithm | varchar      | 50       | -       | NOT NULL                            | Algoritmo utilizado para entrenar el modelo. Ejemplo: XGBoost.             |
+| model_version   | varchar      | 20       | -       | NOT NULL                            | Versión del modelo entrenado.                                              |
+| mae             | numeric      | 15,6     | -       | NULL                                | Error absoluto medio obtenido durante la evaluación del modelo.            |
+| rmse            | numeric      | 15,6     | -       | NULL                                | Raíz del error cuadrático medio obtenida durante la evaluación del modelo. |
+| observations    | integer      | -        | -       | NULL                                | Cantidad de observaciones utilizadas durante el entrenamiento.             |
+| model_path      | varchar      | 255      | -       | NOT NULL                            | Ruta física donde se almacena el archivo del modelo entrenado.             |
+| active          | boolean      | -        | -       | NOT NULL, DEFAULT FALSE             | Indica si el modelo se encuentra activo para realizar predicciones.        |
+| symbol          | varchar      | 20       | -       | NOT NULL                            | Símbolo de la criptomoneda asociada al modelo.                             |
+| training_date   | timestamp    | -        | -       | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Fecha y hora en que se realizó el entrenamiento del modelo.                |
+
+### Índices
+
+* `idx_model_metadata_active`: optimiza consultas sobre modelos activos.
+* `idx_model_metadata_symbol_active`: optimiza búsquedas de modelos activos por criptomoneda.
+
+
+### Nota
+
+La aplicación implementa una regla de negocio que garantiza que para cada criptomoneda exista un único modelo activo a la vez.
+
+Cuando se entrena un nuevo modelo para un símbolo específico, todos los modelos previamente activos asociados a dicho símbolo son desactivados automáticamente y el nuevo modelo pasa a ser el único modelo activo disponible para realizar predicciones.
+
+Por ejemplo, si existen tres modelos entrenados para BTC y se genera un cuarto modelo, los tres modelos anteriores serán marcados como inactivos (`active = FALSE`) y únicamente el modelo más reciente quedará activo (`active = TRUE`).
+
+
+
+
 ## Relaciones
 
 | Relación | Tipo | Descripción |

@@ -7,7 +7,12 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "ts-node src/main.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ml_service_start": "python -m ml_service.main",
+    "ml_service_docs": "python -m ml_service.api.documentation.generate_docs",
+    "ml_service_tests": "python -m pytest ml_service/tests"
+
+
   },
   "repository": {
     "type": "git",

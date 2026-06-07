@@ -46,4 +46,4 @@ app.add_exception_handler(
 
 
 if __name__ == "__main__":
-    uvicorn.run("ml_service.api.main:app", host=config.ML_SV_HOST, port=config.ML_SV_PORT, reload=True)
+    uvicorn.run("ml_service.main:app", host=config.ML_SV_HOST, port=config.ML_SV_PORT, reload=True)

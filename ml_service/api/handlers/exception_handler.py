@@ -16,7 +16,8 @@ async def app_exception_handler(
         status_code=400,
         content={
             "success": False,
-            "error": str(exc)
+            "error": str(exc),
+            "type": exc.__class__.__name__
         }
     )
 
@@ -29,7 +30,8 @@ async def database_exception_handler(
         status_code=500,
         content={
             "success": False,
-            "error": str(exc)
+            "error": str(exc),
+            "type": exc.__class__.__name__
         }
     )
 
@@ -42,7 +44,8 @@ async def external_service_exception_handler(
         status_code=502,
         content={
             "success": False,
-            "error": str(exc)
+            "error": str(exc),
+            "type": exc.__class__.__name__
         }
     )
 
@@ -54,6 +57,7 @@ async def generic_exception_handler(
         status_code=500,
         content={
             "success": False,
-            "error": "Internal server error"
+            "error": str(exc),
+            "type": exc.__class__.__name__
         }
     )

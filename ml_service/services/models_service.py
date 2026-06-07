@@ -154,14 +154,34 @@ class ModelsService:
         }
 
     def get_models(self, symbol: str | None = None):
-        return self.model_repo.get_all_models(symbol)
+        results = self.model_repo.get_all_models(symbol)
+        
+        if not results:
+            raise AppException("No models found")
+        
+        return results
     
     def get_active_model(self, symbol: str):
-        return self.model_repo.get_latest_active_model(symbol)
+        result = self.model_repo.get_latest_active_model(symbol)
+
+        if result is None:
+            raise AppException(f"There is no active model for symbol {symbol}")
+        
+        return result
     
     def get_all_active_models(self, symbol: str):
-        return self.model_repo.get_all_active_models(symbol)
+        results = self.model_repo.get_all_active_models(symbol)
+
+        if not results:
+            raise AppException(f"No active models found for symbol {symbol}")
+        
+        return results
     
     def get_model_by_id(self, model_id: int):
-        return self.model_repo.get_by_id(model_id)
+        result = self.model_repo.get_by_id(model_id)
+
+        if result is None:
+            raise AppException(f"No model found with id {model_id}")
+        
+        return result
     
