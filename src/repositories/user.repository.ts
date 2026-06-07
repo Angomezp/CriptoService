@@ -10,18 +10,18 @@ export default class UserRepository {
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return await this.userRepo.findOne({ where: { Correo: email } });
+        return await this.userRepo.findOne({ where: { correo: email } });
     }
 
     async findById(id: number): Promise<User | null> {
-        return await this.userRepo.findOne({ where: { id_usuario: id } });
+        return await this.userRepo.findOne({ where: { idUsuario: id } });
     }
 
     async updateMfaSecret(id: number, encryptedSecret: string, enabled: boolean): Promise<User> {
         const user = await this.findById(id);
         if (!user) throw new Error('Usuario no encontrado');
-        user.TOTPSecret = encryptedSecret;
-        user.MFAEnabled = enabled;
+        user.totpSecret = encryptedSecret;
+        user.mfaEnabled = enabled;
         return await this.userRepo.save(user);
     }
     
