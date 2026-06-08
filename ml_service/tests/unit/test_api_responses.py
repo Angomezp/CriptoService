@@ -1,0 +1,277 @@
+from unittest.mock import MagicMock
+
+import pytest
+
+from fastapi.testclient import TestClient
+
+from ml_service.main import app
+from ml_service.api.routes.models_routes import models_controller
+from ml_service.exceptions.app_exception import AppException
+
+
+client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def mock_service():
+
+    models_controller.service = MagicMock()
+
+    return models_controller.service
+
+
+def test_train_api( mock_service ):
+
+    mock_service.train_model.return_value = {
+        "trained": True,
+        "symbol": "BTC",
+        "message": "Model trained correctly",
+        "new_records": 100,
+        "last_training": "2025-01-01T00:00:00",
+        "observations": 100,
+        "mae": 0.1,
+        "rmse": 0.2,
+        "model_path": "model.joblib"
+    }
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin"
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.json()["symbol"] == "BTC"
+
+
+def test_train_api_invalid_payload():
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": ""
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_train_api_missing_fields():
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC"
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_predict_api( mock_service ):
+
+    mock_service.predict.return_value = {
+        "symbol": "BTC",
+        "current_price": 100.0,
+        "model": "BTC Predictor",
+        "version": "1.0",
+        "predictions": [
+            {
+                "prediction_hour": i,
+                "estimated_price": 101.0,
+                "percentage_variation": 1.0
+            }
+            for i in range(1, 25)
+        ]
+    }
+
+    response = client.post(
+        "/models/predict",
+        json={
+            "symbol": "BTC"
+        }
+    )
+
+    assert response.status_code == 200
+
+
+def test_predict_api_missing_symbol():
+
+    response = client.post(
+        "/models/predict",
+        json={}
+    )
+
+    assert response.status_code == 422
+
+
+def test_predict_hour_api( mock_service ):
+
+    mock_service.predict_hour.return_value = {
+        "symbol": "BTC",
+        "current_price": 100.0,
+        "model": "BTC Predictor",
+        "version": "1.0",
+        "prediction": {
+            "prediction_hour": 6,
+            "estimated_price": 106.0,
+            "percentage_variation": 6.0
+        }
+    }
+
+    response = client.post(
+        "/models/predict/hour",
+        json={
+            "symbol": "BTC",
+            "hour": 6
+        }
+    )
+
+    assert response.status_code == 200
+
+
+def test_predict_hour_invalid_payload():
+
+    response = client.post(
+        "/models/predict/hour",
+        json={
+            "symbol": "BTC"
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_predict_no_active_model( mock_service ):
+
+    mock_service.predict.side_effect = AppException(
+        "There is no active model"
+    )
+
+    response = client.post(
+        "/models/predict",
+        json={
+            "symbol": "BTC"
+        }
+    )
+
+    assert response.status_code == 400
+
+
+def test_predict_hour_invalid_range( mock_service ):
+
+    mock_service.predict_hour.side_effect = AppException(
+        "The hour must be between 1 and 24"
+    )
+
+    response = client.post(
+        "/models/predict/hour",
+        json={
+            "symbol": "BTC",
+            "hour": 30
+        }
+    )
+
+    assert response.status_code == 400
+
+
+def test_get_models( mock_service ):
+
+    mock_service.get_models.return_value = []
+
+    response = client.get("/models/")
+
+    assert response.status_code == 200
+
+
+def test_get_models_empty( mock_service ):
+
+    mock_service.get_models.side_effect = AppException(
+        "No models found"
+    )
+
+    response = client.get("/models/")
+
+    assert response.status_code == 400
+
+
+def test_get_active_api( mock_service ):
+
+    mock_service.get_active_model.return_value = {
+        "id": 1,
+        "model_name": "BTC Predictor",
+        "model_algorithm": "XGBoost",
+        "model_version": "1.0",
+        "mae": 0.1,
+        "rmse": 0.2,
+        "observations": 100,
+        "active": True,
+        "model_path": "model.joblib",
+        "symbol": "BTC",
+        "training_date": "2025-01-01T00:00:00"
+    }
+
+    response = client.get(
+        "/models/active/latest/BTC"
+    )
+
+    assert response.status_code == 200
+
+
+def test_get_by_id( mock_service ):
+
+    mock_service.get_model_by_id.return_value = {
+        "id": 1,
+        "model_name": "BTC Predictor",
+        "model_algorithm": "XGBoost",
+        "model_version": "1.0",
+        "mae": 0.1,
+        "rmse": 0.2,
+        "observations": 100,
+        "active": True,
+        "model_path": "model.joblib",
+        "symbol": "BTC",
+        "training_date": "2025-01-01T00:00:00"
+    }
+
+    response = client.get(
+        "/models/id/1"
+    )
+
+    assert response.status_code == 200
+
+
+def test_get_by_symbol( mock_service ):
+
+    mock_service.get_models.return_value = []
+
+    response = client.get(
+        "/models/symbol/BTC"
+    )
+
+    assert response.status_code == 200
+
+
+def test_get_active_latest( mock_service ):
+
+    mock_service.get_active_model.return_value = {
+        "id": 1,
+        "model_name": "BTC Predictor",
+        "model_algorithm": "XGBoost",
+        "model_version": "1.0",
+        "mae": 0.1,
+        "rmse": 0.2,
+        "observations": 100,
+        "active": True,
+        "model_path": "model.joblib",
+        "symbol": "BTC",
+        "training_date": "2025-01-01T00:00:00"
+    }
+
+    response = client.get(
+        "/models/active/latest/BTC"
+    )
+
+    assert response.status_code == 200

@@ -15,7 +15,7 @@ El sistema adopta una combinación de estilos arquitectónicos: **Monolito con S
 
 El núcleo del sistema es un monolito construido en Node.js con TypeScript y Express. Todo el backend principal (autenticación, criptomonedas, portafolio) vive dentro de esta única aplicación.
 
-Sin embargo, el módulo de predicciones requiere modelos de Machine Learning (regresión lineal, medias móviles) que son significativamente más fáciles de implementar en Python gracias a librerías especializadas como `scikit-learn` que no tienen equivalente sólido en TypeScript. Por esta razón, las predicciones se implementan como un **servicio auxiliar en Python** que corre como proceso separado y se comunica con el monolito principal mediante HTTP.
+Sin embargo, el módulo de predicciones requiere modelos de Machine Learning (XGBoost, MultiOutpuRegressor) que son significativamente más fáciles de implementar en Python gracias a librerías especializadas como `scikit-learn` que no tienen equivalente sólido en TypeScript. Por esta razón, las predicciones se implementan como un **servicio auxiliar en Python** que corre como proceso separado y se comunica con el monolito principal mediante HTTP.
 
 Esta decisión no convierte la arquitectura en microservicios porque solo se extrae una parte muy específica del sistema. El resto sigue siendo un monolito cohesionado.
 
@@ -93,14 +93,43 @@ proyecto_cripto/
 
 ### Servicio auxiliar de ML (Python)
 
-```
+```text
 ml_service/
 │
-├── model/
-│   └── predictor             → implementa regresión lineal y medias móviles
+├── api/
+│   ├── controllers/          → controladores que reciben las solicitudes HTTP
+│   ├── documentation/        → pequeño script para sacar la documentacion con openapi
+│   ├── routes/               → definición de endpoints FastAPI
+│   ├── schemas/              → modelos de request y response
+│   ├── handlers/             → manejo centralizado de excepciones
 │
-└── main                      → arranca el servidor Python y expone el endpoint de predicción
+├── services/
+│   ├── models_service.py     → lógica principal de entrenamiento y predicción
+│   └── coingecko_service.py  → integración con la API de CoinGecko
+│
+├── repositories/             → acceso y persistencia de datos
+│
+├── entities/                 → entidades del dominio y modelos de base de datos
+│
+├── ml/
+│   ├── feature_helper.py     → generación y transformación de características
+│   ├── model_trainer.py      → entrenamiento de modelos
+│   └── model_predictor.py    → carga y ejecución de modelos entrenados
+│
+├── config/                   → configuración centralizada de la aplicación
+│   ├── database.py           → conexión a la base de datos (singleton)
+│   └── env.py                → carga variables del .env y declara algunas constantes
+│
+├── exceptions/               → excepciones personalizadas
+│
+│── tests/
+│   ├── unit/                 → pruebas unitarias internas y de la api
+│
+├── main.py                  → arranca el servidor FastAPI
 ```
+
+El servicio auxiliar de Machine Learning se encarga de recopilar y almacenar datos históricos de mercado, entrenar modelos predictivos basados en XGBoost, gestionar versiones de modelos entrenados y exponer una API REST para realizar predicciones sobre criptomonedas.
+
 
 ---
 
@@ -138,11 +167,12 @@ La capa de seguridad es transversal, es decir, no pertenece a un solo dominio si
 ```
 1. Usuario solicita predicción → Prediction Controller
 2. Prediction Controller delega → Prediction Service
-3. Prediction Service consulta precios históricos → Crypto Service → CoinGecko
-4. Prediction Service envía los datos históricos al servicio Python ML por HTTP
-5. Servicio Python aplica el modelo (regresión lineal o medias móviles)
-6. Servicio Python devuelve el resultado al Prediction Service
-7. Prediction Service devuelve la predicción al cliente
+3. Prediction Service solicita una predicción al servicio ML por HTTP
+4. El servicio ML consulta el modelo activo correspondiente
+5. El servicio ML obtiene los datos históricos almacenados
+6. El modelo XGBoost genera la predicción
+7. El servicio ML devuelve el resultado
+8. Prediction Service devuelve la respuesta al cliente
 ```
 
 ---
@@ -154,7 +184,7 @@ El sistema se despliega en un servidor en la nube con dos procesos corriendo sim
 - **Monolito Node.js:** el backend principal con todas las capas
 - **Servicio ML Python:** el proceso auxiliar que calcula las predicciones
 
-Ambos procesos corren en el mismo servidor. La comunicación entre ellos es local por HTTP. Los servicios externos (CoinGecko) son consumidos por el monolito mediante HTTP.
+Ambos procesos corren en el mismo servidor. La comunicación entre ellos es local por HTTP. Los servicios externos (CoinGecko) son consumidos por el monolito y el servicio de ML mediante HTTP, en sus debidas tareas.
 
 ---
 
