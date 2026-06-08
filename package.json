@@ -6,13 +6,11 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
+    "dev": "tsx src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "ml_service_start": "python -m ml_service.main",
     "ml_service_docs": "python -m ml_service.api.documentation.generate_docs",
     "ml_service_tests": "python -m pytest ml_service/tests"
-
-
   },
   "repository": {
     "type": "git",
@@ -47,6 +45,7 @@
     "jsonwebtoken": "^9.0.3",
     "otplib": "^13.4.0",
     "pg": "^8.21.0",
+    "postgres": "^3.4.9",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^1.0.0"

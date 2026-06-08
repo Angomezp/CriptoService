@@ -29,9 +29,9 @@ export default class AuthService {
             }
 
             const hashedPassword = await hashear(password);
-            const user = await this.userRepo.createUser({ NombreCompleto: nombre, Correo: correo, PasswordHash: hashedPassword });
+            const user = await this.userRepo.createUser({ nombre: nombre, correo: correo, passwordHash: hashedPassword });
 
-            return { message: 'Usuario registrado exitosamente', nombre: user.NombreCompleto, correo: user.Correo };
+            return { message: 'Usuario registrado exitosamente', nombre: user.nombre, correo: user.correo };
         } catch (error: any) {
             if (error instanceof AppError) throw error;
             throw new AppError('Error al registrar el usuario', 500, 'REGISTER_ERROR', {
@@ -45,17 +45,17 @@ export default class AuthService {
             if (!user) {
                 throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
             }
-            const passwordValid = await verificar(password, user.PasswordHash);
+            const passwordValid = await verificar(password, user.passwordHash);
             if (!passwordValid) {
                 throw new AppError('Contraseña incorrecta', 401, 'INVALID_PASSWORD');
             }
             
-            if (user.MFAEnabled) {
-                const mfaToken = jwtHandler.generarMfaToken(user.id_usuario);
+            if (user.mfaEnabled) {
+                const mfaToken = jwtHandler.generarMfaToken(user.idUsuario);
                 return { mfaToken: mfaToken, message: 'Contraseña correcta, ingresa el código MFA' , mfa_requerido : true};
             }
 
-            const token = jwtHandler.generarToken(user.id_usuario);
+            const token = jwtHandler.generarToken(user.idUsuario);
 
             return { message: 'Inicio de sesión exitoso', token: token, mfa_requerido : false};
 
@@ -78,17 +78,17 @@ export default class AuthService {
                 throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
             }
 
-            if (!user.TOTPSecret) {
+            if (!user.totpSecret) {
                 throw new AppError('MFA no configurado para el usuario', 400, 'MFA_NOT_CONFIGURED');
             }
 
-            const secretoDesc = encryptionHandler.descifrar(user.TOTPSecret);
+            const secretoDesc = encryptionHandler.descifrar(user.totpSecret);
             const valido = await totpHandler.verificarTokenTOTP(codigo_totp, secretoDesc);
             if (!valido) {
                 throw new AppError('Código MFA inválido', 401, 'INVALID_MFA_CODE');
             }
 
-            const token = jwtHandler.generarToken(user.id_usuario);
+            const token = jwtHandler.generarToken(user.idUsuario);
             return token;
 
         } catch (error: any) {
@@ -110,8 +110,8 @@ export default class AuthService {
         }
         const totp = totpHandler.generarSecret(); 
         const TOTPSecret = encryptionHandler.cifrar(totp);
-        await this.userRepo.updateMfaSecret(user.id_usuario, TOTPSecret, false);
-        const uri = totpHandler.generarUriTOTP(user.Correo, totp);
+        await this.userRepo.updateMfaSecret(user.idUsuario, TOTPSecret, false);
+        const uri = totpHandler.generarUriTOTP(user.correo, totp);
         const qrCode = await totpHandler.generarCodigoQR(uri);
         return { qrCode };
     }
@@ -125,15 +125,15 @@ export default class AuthService {
         if (!user) {
             throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
         }
-        if (!user.TOTPSecret) {
+        if (!user.totpSecret) {
             throw new AppError('MFA no configurado para el usuario', 400, 'MFA_NOT_CONFIGURED');
         }
-        const secretoDesc = encryptionHandler.descifrar(user.TOTPSecret);
+        const secretoDesc = encryptionHandler.descifrar(user.totpSecret);
         const valido = await totpHandler.verificarTokenTOTP(codigo_totp, secretoDesc);
         if (!valido) {
             throw new AppError('Código MFA inválido', 401, 'INVALID_MFA_CODE');
         }
-        await this.userRepo.updateMfaSecret(user.id_usuario, user.TOTPSecret!, true);
+        await this.userRepo.updateMfaSecret(user.idUsuario, user.totpSecret!, true);
     }
 
 
