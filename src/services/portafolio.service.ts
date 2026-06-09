@@ -19,4 +19,14 @@ export default class PortafolioService {
         return await this.portafolioRepo.savePortafolio(payload.userId, nombrePortafolio);
     }
 
+    async getPortafolios(jwtToken: string) {
+        const payload = verificarToken(jwtToken);
+        if (!payload) {throw new AppError('Token inválido', 401, 'INVALID_TOKEN');
+        }
+        const user = await this.userRepo.findById(payload.userId);
+        if (!user) {throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
+        }
+        return await this.portafolioRepo.findAllByUserId(payload.userId);
+    }
+
 }

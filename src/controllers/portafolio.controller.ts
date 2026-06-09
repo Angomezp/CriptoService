@@ -34,3 +34,41 @@ export const crearPortafolio = async (req: Request, res: Response) => {
         });
     }
 };
+
+
+export const obtenerPortafolios = async ( req: Request, res: Response) => {
+
+    try {
+
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                message: 'No autorizado'
+            });
+        }
+
+        const token = authHeader.split(' ')[1]!;
+
+        const portafolios =
+            await portafolioService.getPortafolios(token);
+
+        return res.status(200).json({
+            portafolios
+        });
+
+    } catch (error: any) {
+
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message,
+                code: error.code,
+                details: error.details
+            });
+        }
+
+        return res.status(500).json({
+            message: 'Error del servidor al obtener los portafolios'
+        });
+    }
+};

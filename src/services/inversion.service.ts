@@ -41,7 +41,8 @@ export default class InversionService {
 
     async createInversion( nombrePortafolio: string, criptomoneda: string, cantidad: number, jwtToken: string) 
     {   
-        const idPortafolio = await this.portafolioRepo.findIdByNombre(nombrePortafolio);
+        const payload = verificarToken(jwtToken);
+        const idPortafolio = await this.portafolioRepo.findIdByUserAndName(payload.userId, nombrePortafolio);
         if (!idPortafolio) {
             throw new AppError('Portafolio no encontrado', 404, 'PORTAFOLIO_NOT_FOUND');
         }
@@ -54,4 +55,26 @@ export default class InversionService {
             costoInicial
         );
     }
-}
+
+    async getInversiones( nombrePortafolio: string, jwtToken: string) {
+        const payload = verificarToken(jwtToken);
+        const idPortafolio = await this.portafolioRepo.findIdByUserAndName(payload.userId, nombrePortafolio);
+        if (!idPortafolio) {
+            throw new AppError('Portafolio no encontrado', 404, 'PORTAFOLIO_NOT_FOUND');
+        }
+        const esPropietario = await this.portafolioRepo.existsByUserAndName( payload.userId, nombrePortafolio );
+        if (!esPropietario) { throw new AppError( 'No tienes acceso a este portafolio', 403, 'FORBIDDEN');}
+        return await this.inversionRepo.findByPortafolio(idPortafolio);
+    }
+
+    async getInversionById( idInversion: number, jwtToken: string) {
+        const payload = verificarToken(jwtToken);
+        const inversion = await this.inversionRepo.findById(idInversion);
+        if (!inversion) {
+            throw new AppError('Inversión no encontrada', 404, 'INVERSION_NOT_FOUND');
+        }
+        const esPropietario = await this.inversionRepo.existsByIdAndUser( idInversion, payload.userId );
+        if (!esPropietario) { throw new AppError( 'No tienes acceso a esta inversión', 403, 'FORBIDDEN');}
+        return inversion;
+    }
+}    
