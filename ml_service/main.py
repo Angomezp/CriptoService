@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 import uvicorn
 
+from ml_service.api.security.api_key import validate_api_key
 from  ml_service.config.env import config
 from ml_service.api.routes.models_routes import router as models_router
 
@@ -22,7 +23,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(models_router, prefix="/models", tags=["Models"])
+app.include_router(models_router, prefix="/models", tags=["Models"], dependencies=[Depends(validate_api_key)])
 
 app.add_exception_handler(
     AppException,

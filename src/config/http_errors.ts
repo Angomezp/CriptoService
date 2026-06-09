@@ -23,3 +23,22 @@ export class ConflictError extends AppError {
     super(message, 409, code, details);
   }
 }
+
+export class UnauthorizedError extends AppError {
+  constructor(
+    message = 'Unauthorized',
+    code = 'UNAUTHORIZED'
+  ) {
+    super(message, 401, code);
+  }
+}
+
+export class ExternalServiceError extends AppError {
+  constructor(
+    message = 'External service error',
+    code = 'EXTERNAL_SERVICE_ERROR',
+    details?: any
+  ) {
+    super(message, 502, code, details);
+  }
+}

@@ -13,15 +13,33 @@
                 ],
                 "summary": "Train Model",
                 "operationId": "train_model_models_train_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/TrainRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -54,15 +72,33 @@
                 ],
                 "summary": "Predict",
                 "operationId": "predict_models_predict_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/PredictRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -95,15 +131,33 @@
                 ],
                 "summary": "Predict For Hour",
                 "operationId": "predict_for_hour_models_predict_hour_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/PredictHourRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -136,17 +190,45 @@
                 ],
                 "summary": "Get All Models",
                 "operationId": "get_all_models_models__get",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "array",
                                     "items": {
                                         "$ref": "#/components/schemas/ModelResponse"
                                     },
-                                    "type": "array",
                                     "title": "Response Get All Models Models  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
                                 }
                             }
                         }
@@ -169,6 +251,22 @@
                         "schema": {
                             "type": "string",
                             "title": "Symbol"
+                        }
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
                         }
                     }
                 ],
@@ -200,13 +298,13 @@
                 }
             }
         },
-        "/models/active/latest/{symbol}": {
+        "/models/active/{symbol}": {
             "get": {
                 "tags": [
                     "Models"
                 ],
-                "summary": "Get Latest Active Model By Symbol",
-                "operationId": "get_latest_active_model_by_symbol_models_active_latest__symbol__get",
+                "summary": "Get Active Model By Symbol",
+                "operationId": "get_active_model_by_symbol_models_active__symbol__get",
                 "parameters": [
                     {
                         "name": "symbol",
@@ -215,6 +313,22 @@
                         "schema": {
                             "type": "string",
                             "title": "Symbol"
+                        }
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
                         }
                     }
                 ],
@@ -242,21 +356,28 @@
                 }
             }
         },
-        "/models/active/{symbol}": {
+        "/models/active": {
             "get": {
                 "tags": [
                     "Models"
                 ],
                 "summary": "Get All Active Models By Symbol",
-                "operationId": "get_all_active_models_by_symbol_models_active__symbol__get",
+                "operationId": "get_all_active_models_by_symbol_models_active_get",
                 "parameters": [
                     {
-                        "name": "symbol",
-                        "in": "path",
-                        "required": true,
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
                         "schema": {
-                            "type": "string",
-                            "title": "Symbol"
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
                         }
                     }
                 ],
@@ -270,7 +391,7 @@
                                     "items": {
                                         "$ref": "#/components/schemas/ModelResponse"
                                     },
-                                    "title": "Response Get All Active Models By Symbol Models Active  Symbol  Get"
+                                    "title": "Response Get All Active Models By Symbol Models Active Get"
                                 }
                             }
                         }
@@ -303,6 +424,22 @@
                         "schema": {
                             "type": "integer",
                             "title": "Model Id"
+                        }
+                    },
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
                         }
                     }
                 ],

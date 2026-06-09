@@ -30,7 +30,7 @@ class ModelsService:
     ):
         try:
 
-            latest_model = self.model_repo.get_latest_active_model(symbol)
+            latest_model = self.model_repo.get_active_model_by_symbol(symbol)
 
             if latest_model:
 
@@ -91,7 +91,7 @@ class ModelsService:
     ) -> dict:
         
         try:
-            metadata = self.model_repo.get_latest_active_model(symbol)
+            metadata = self.model_repo.get_active_model_by_symbol(symbol)
 
             if metadata is None:
                 raise AppException(f"There is no active model for {symbol}")
@@ -161,19 +161,19 @@ class ModelsService:
         
         return results
     
-    def get_active_model(self, symbol: str):
-        result = self.model_repo.get_latest_active_model(symbol)
+    def get_active_model_by_symbol(self, symbol: str):
+        result = self.model_repo.get_active_model_by_symbol(symbol)
 
         if result is None:
             raise AppException(f"There is no active model for symbol {symbol}")
         
         return result
     
-    def get_all_active_models(self, symbol: str):
-        results = self.model_repo.get_all_active_models(symbol)
+    def get_all_active_models(self):
+        results = self.model_repo.get_all_active_models()
 
         if not results:
-            raise AppException(f"No active models found for symbol {symbol}")
+            raise AppException("No active models found")
         
         return results
     

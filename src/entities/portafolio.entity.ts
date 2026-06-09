@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { User } from "./user.entity.js";
 import { Inversion } from "./inversion.entity.js";
+import type { Relation } from "typeorm";
 
 @Entity("portafolio")
 export class Portafolio {
@@ -19,9 +20,9 @@ export class Portafolio {
     // Relación muchos a uno con el Usuario (Llave Foránea)
     @ManyToOne(() => User, (usuario) => usuario.portafolios, { onDelete: "CASCADE" })
     @JoinColumn({ name: "id_usuario" })
-    usuario!: User;
+    usuario!: Relation<User>;
 
     // Relación inversa: Un portafolio agrupa múltiples registros de inversión
     @OneToMany(() => Inversion, (inversion) => inversion.portafolio)
-    inversiones!: Inversion[];
+    inversiones!: Relation<Inversion[]>;
 }

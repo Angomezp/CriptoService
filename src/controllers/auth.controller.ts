@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import AuthService  from '../services/auth.service.js';
-import { AppError, ValidationError } from '../config/http.errors.js';
+import { AppError, ValidationError } from '../config/http_errors.js';
 
 const authService = new AuthService();
 

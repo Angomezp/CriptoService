@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import { AppDataSource } from './config/datasource.js';
 import { env } from './config/env.js';
 import router from './config/router.js';
+import { errorHandler } from './handlers/error_handler.middleware.js';
 
 async function main() {
   try {
@@ -19,6 +20,7 @@ async function main() {
     app.listen(env.serverPort, () => {
       console.log(`Server running on port ${env.serverPort}`);
     });
+    app.use(errorHandler);
   } catch (error) {
     console.error('Error initializing application:', error);
   }

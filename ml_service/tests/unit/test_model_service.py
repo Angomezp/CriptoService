@@ -24,7 +24,7 @@ def service():
 
 def test_train_model_success(service):
 
-    service.model_repo.get_latest_active_model.return_value = None
+    service.model_repo.get_active_model_by_symbol.return_value = None
 
     service.coingecko.get_market_chart.return_value = [
         {"price": 100}
@@ -49,14 +49,14 @@ def test_train_model_success(service):
 
 def test_predict_no_model(service):
 
-    service.model_repo.get_latest_active_model.return_value = None
+    service.model_repo.get_active_model_by_symbol.return_value = None
 
     with pytest.raises(AppException):
         service.predict("BTC")
 
 def test_predict_success(service):
 
-    service.model_repo.get_latest_active_model.return_value = MagicMock(
+    service.model_repo.get_active_model_by_symbol.return_value = MagicMock(
         model_path="model.joblib",
         model_name="BTC Model",
         model_version="1.0"
@@ -137,13 +137,13 @@ def test_get_models(service):
     assert len(result) == 1
 
 
-def test_get_active_model(service):
+def test_get_active_model_by_symbol(service):
 
-    service.model_repo.get_latest_active_model.return_value = {
+    service.model_repo.get_active_model_by_symbol.return_value = {
         "symbol": "BTC"
     }
 
-    result = service.get_active_model("BTC")
+    result = service.get_active_model_by_symbol("BTC")
 
     assert result["symbol"] == "BTC"
 

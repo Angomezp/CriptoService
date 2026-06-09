@@ -11,8 +11,6 @@
     "ml_service_start": "python -m ml_service.main",
     "ml_service_docs": "python -m ml_service.api.documentation.generate_docs",
     "ml_service_tests": "python -m pytest ml_service/tests"
-
-
   },
   "repository": {
     "type": "git",
@@ -41,6 +39,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "axios": "^1.17.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

@@ -38,13 +38,13 @@ def get_all_models():
 def get_models_by_symbol( symbol: str ):
     return models_controller.get_all_models(symbol)
 
-@router.get("/active/latest/{symbol}", response_model=ModelResponse)
-def get_latest_active_model_by_symbol( symbol: str ):
-    return models_controller.get_latest_active_model_by_symbol( symbol )
+@router.get("/active/{symbol}", response_model=ModelResponse)
+def get_active_model_by_symbol( symbol: str ):
+    return models_controller.get_active_model_by_symbol( symbol )
 
-@router.get("/active/{symbol}", response_model=list[ModelResponse])
-def get_all_active_models_by_symbol( symbol: str ):
-    return models_controller.get_all_active_models_by_symbol( symbol )
+@router.get("/active", response_model=list[ModelResponse])
+def get_all_active_models_by_symbol():
+    return models_controller.get_all_active_models()
 
 @router.get("/id/{model_id}", response_model=ModelResponse)
 def get_model_by_id( model_id: int ):

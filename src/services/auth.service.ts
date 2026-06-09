@@ -1,6 +1,6 @@
 import { hashear, verificar } from '../security/hashing.js';
 import UserRepository from '../repositories/user.repository.js';
-import { AppError, ConflictError, ValidationError } from '../config/http.errors.js';
+import { AppError, ConflictError, ValidationError } from '../config/http_errors.js';
 import * as jwtHandler from '../security/jwt.handler.js';
 import * as totpHandler from '../security/totp.handler.js';
 import * as encryptionHandler from '../security/encryption.js';

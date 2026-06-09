@@ -14,24 +14,25 @@ class ModelsController:
     def predict(self, symbol: str):
 
         return self.service.predict(symbol)
-
-    def get_all_models(self, symbol: str = None):
-
-        return self.service.get_models(symbol)
-
-    def get_latest_active_model_by_symbol(self, symbol: str):
-
-        return self.service.get_active_model(symbol)
-
-    def get_all_active_models_by_symbol(self, symbol: str):
-
-        return self.service.get_all_active_models(symbol)
-    
-    def get_model_by_id(self, model_id: int):
-
-        return self.service.get_model_by_id(model_id)
     
     def predict_for_hour(self, symbol: str, hour: int):
 
         return self.service.predict_hour(symbol, hour)
+    
+    def get_all_models(self, symbol: str = None):
+
+        return self.service.get_models(symbol)
+    
+    def get_all_active_models(self):
+
+        return self.service.get_all_active_models()
+
+    def get_active_model_by_symbol(self, symbol: str):
+
+        return self.service.get_active_model_by_symbol(symbol)
+
+    def get_model_by_id(self, model_id: int):
+
+        return self.service.get_model_by_id(model_id)
+    
     

@@ -89,7 +89,7 @@ class ModelMetadataRepository:
         finally:
             session.close()
     
-    def get_latest_active_model( self,
+    def get_active_model_by_symbol( self,
         symbol: str
     ) -> ModelMetadata | None:
         session = Database.get_session()
@@ -107,17 +107,15 @@ class ModelMetadataRepository:
 
         finally:
             session.close()
-    
-    def get_all_active_models( self,
-        symbol: str
-    ) -> list[ModelMetadata]:
+
+    def get_all_active_models( self ) -> list[ModelMetadata]:
 
         session = Database.get_session()
 
         try:
             return (
                 session.query(ModelMetadata)
-                    .filter( ModelMetadata.active.is_(True), func.lower(ModelMetadata.symbol) == func.lower(symbol) )
+                    .filter( ModelMetadata.active.is_(True) )
                     .order_by( ModelMetadata.training_date.desc() )
                     .all()
             )

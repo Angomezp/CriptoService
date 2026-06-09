@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Portafolio } from "./portafolio.entity.js";
+import type { Relation } from "typeorm";
 
 @Entity("inversion")
 export class Inversion {
@@ -24,5 +25,5 @@ export class Inversion {
     // Relación correcta: La inversión depende directamente de la existencia del Portafolio
     @ManyToOne(() => Portafolio, (portafolio) => portafolio.inversiones, { onDelete: "CASCADE" })
     @JoinColumn({ name: "id_portafolio" })
-    portafolio!: Portafolio;
+    portafolio!: Relation<Portafolio>;
 }
