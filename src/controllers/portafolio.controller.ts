@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import PortafolioService from '../services/portafolio.service.js';
-import { AppError } from '../config/http.errors.js';
+import { AppError } from '../config/http_errors.js';
 
 const portafolioService = new PortafolioService();
 

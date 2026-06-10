@@ -1,26 +1,24 @@
 import portafolioRepository from '../repositories/portafolio.repository.js';
-import portafolioService from './portafolio.service.js';
 import InversionRepository from '../repositories/inversion.repository.js';
 import { verificarToken } from '../security/jwt.handler.js'; 
-import { AppError, ConflictError, ValidationError } from '../config/http.errors.js';
+import { AppError, ValidationError } from '../config/http_errors.js';
 
 export default class InversionService {
 
-    private portafolioServ = new portafolioService();
     private inversionRepo = new InversionRepository();
     private portafolioRepo = new portafolioRepository();
 
     async getPrecio(criptomoneda: string) {
 
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${criptomoneda}&vs_currencies=usd`);
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${criptomoneda}&vs_currencies=usd`);
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (!data[criptomoneda]) {
-        throw new AppError('Criptomoneda no encontrada', 404, 'CRYPTO_NOT_FOUND');
-    }
+        if (!data[criptomoneda]) {
+            throw new AppError('Criptomoneda no encontrada', 404, 'CRYPTO_NOT_FOUND');
+        }
 
-    return data[criptomoneda].usd;
+        return data[criptomoneda].usd;
     }
 
     async validateCantidad(cantidad: number) {

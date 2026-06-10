@@ -7,6 +7,6 @@ router.post('/create', crearInversion);
 
 router.get('/list', obtenerInversiones);
 
-router.get('/:idInversion', obtenerInversion);
+router.get('/id/:idInversion', obtenerInversion);
 
 export default router;

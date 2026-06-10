@@ -1,4 +1,4 @@
-import InversionService from './inversion.service.js';
+import InversionService from '../services/inversion.service.js';
 
 const service = new InversionService();
 

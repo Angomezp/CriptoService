@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import InversionService from '../services/inversion.service.js';
-import { AppError } from '../config/http.errors.js';
+import { AppError } from '../config/http_errors.js';
 
 const inversionService = new InversionService();
 
@@ -54,7 +54,7 @@ export const crearInversion = async (req: Request, res: Response) => {
 
 export const obtenerInversiones = async (req: Request, res: Response) => {
 
-    const nombrePortafolio = req.query.nombrePortafolio as string;
+    const nombrePortafolio = req.body.nombrePortafolio as string;
 
     if (!nombrePortafolio) {
         return res.status(400).json({

@@ -1,6 +1,6 @@
 import portafolioRepository from '../repositories/portafolio.repository.js';
 import { verificarToken } from '../security/jwt.handler.js'; 
-import { AppError, ConflictError, ValidationError } from '../config/http.errors.js';
+import { AppError } from '../config/http_errors.js';
 import UserRepository from '../repositories/user.repository.js';
 
 
