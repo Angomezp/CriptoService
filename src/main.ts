@@ -1,14 +1,14 @@
 import cors from 'cors';
 import express from 'express';
 import 'reflect-metadata';
-import { AppDataSource } from './config/datasource.js';
+import { appDataSource } from './config/datasource.js';
 import { env } from './config/env.js';
 import router from './config/router.js';
 import { errorHandler } from './handlers/error.handler.js';
 
 async function main() {
     try {
-        await AppDataSource.initialize();
+        await appDataSource.initialize();
         console.log('Database connected');
 
         const app = express();
