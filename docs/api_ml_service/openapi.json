@@ -8,7 +8,9 @@
     "paths": {
         "/models/train": {
             "post": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Train Model",
                 "operationId": "train_model_models_train_post",
                 "parameters": [
@@ -65,7 +67,9 @@
         },
         "/models/predict": {
             "post": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Predict",
                 "operationId": "predict_models_predict_post",
                 "parameters": [
@@ -122,7 +126,9 @@
         },
         "/models/predict/hour": {
             "post": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Predict For Hour",
                 "operationId": "predict_for_hour_models_predict_hour_post",
                 "parameters": [
@@ -179,7 +185,9 @@
         },
         "/models/": {
             "get": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Get All Models",
                 "operationId": "get_all_models_models__get",
                 "parameters": [
@@ -230,7 +238,9 @@
         },
         "/models/symbol/{symbol}": {
             "get": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Get Models By Symbol",
                 "operationId": "get_models_by_symbol_models_symbol__symbol__get",
                 "parameters": [
@@ -290,7 +300,9 @@
         },
         "/models/active/{symbol}": {
             "get": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Get Active Model By Symbol",
                 "operationId": "get_active_model_by_symbol_models_active__symbol__get",
                 "parameters": [
@@ -346,7 +358,9 @@
         },
         "/models/active": {
             "get": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Get All Active Models By Symbol",
                 "operationId": "get_all_active_models_by_symbol_models_active_get",
                 "parameters": [
@@ -397,7 +411,9 @@
         },
         "/models/id/{model_id}": {
             "get": {
-                "tags": ["Models"],
+                "tags": [
+                    "Models"
+                ],
                 "summary": "Get Model By Id",
                 "operationId": "get_model_by_id_models_id__model_id__get",
                 "parameters": [
@@ -466,6 +482,78 @@
                 },
                 "type": "object",
                 "title": "HTTPValidationError"
+            },
+            "ModelParamsRequest": {
+                "properties": {
+                    "n_estimators": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "N Estimators"
+                    },
+                    "max_depth": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Max Depth"
+                    },
+                    "learning_rate": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Learning Rate"
+                    },
+                    "objective": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Objective"
+                    },
+                    "random_state": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Random State"
+                    },
+                    "n_jobs": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "N Jobs"
+                    }
+                },
+                "type": "object",
+                "title": "ModelParamsRequest"
             },
             "ModelResponse": {
                 "properties": {
@@ -543,7 +631,10 @@
                     }
                 },
                 "type": "object",
-                "required": ["symbol", "hour"],
+                "required": [
+                    "symbol",
+                    "hour"
+                ],
                 "title": "PredictHourRequest"
             },
             "PredictRequest": {
@@ -554,7 +645,9 @@
                     }
                 },
                 "type": "object",
-                "required": ["symbol"],
+                "required": [
+                    "symbol"
+                ],
                 "title": "PredictRequest"
             },
             "PredictionHourResponse": {
@@ -657,10 +750,23 @@
                     "coin_gecko_id": {
                         "type": "string",
                         "title": "Coin Gecko Id"
+                    },
+                    "model_params": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ModelParamsRequest"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     }
                 },
                 "type": "object",
-                "required": ["symbol", "coin_gecko_id"],
+                "required": [
+                    "symbol",
+                    "coin_gecko_id"
+                ],
                 "title": "TrainRequest"
             },
             "TrainResponse": {
@@ -757,7 +863,11 @@
                     }
                 },
                 "type": "object",
-                "required": ["trained", "message", "symbol"],
+                "required": [
+                    "trained",
+                    "message",
+                    "symbol"
+                ],
                 "title": "TrainResponse"
             },
             "ValidationError": {
@@ -793,7 +903,11 @@
                     }
                 },
                 "type": "object",
-                "required": ["loc", "msg", "type"],
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
                 "title": "ValidationError"
             }
         }

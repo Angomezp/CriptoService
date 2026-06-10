@@ -20,15 +20,19 @@ models_controller = ModelsController()
 
 @router.post("/train", response_model=TrainResponse)
 def train_model( request: TrainRequest ):
-    return models_controller.train( request.symbol, request.coin_gecko_id )
+    return models_controller.train( symbol = request.symbol, 
+                                   coin_gecko_id = request.coin_gecko_id,
+                                   model_params = request.model_params.model_dump(exclude_none=True)
+                                   if request.model_params
+                                   else None )
 
 @router.post("/predict", response_model=PredictionResponse)
 def predict( request: PredictRequest ):
-    return models_controller.predict(request.symbol)
+    return models_controller.predict(symbol = request.symbol)
 
 @router.post("/predict/hour", response_model=PredictionHourResponse)
 def predict_for_hour( request: PredictHourRequest ):
-    return models_controller.predict_for_hour( request.symbol, request.hour )
+    return models_controller.predict_for_hour( symbol = request.symbol, hour = request.hour )
 
 @router.get("/", response_model=list[ModelResponse])
 def get_all_models():

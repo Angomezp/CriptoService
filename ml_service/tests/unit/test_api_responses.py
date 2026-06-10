@@ -53,6 +53,107 @@ def test_train_api(mock_service):
     assert response.json()["symbol"] == "BTC"
 
 
+def test_train_api_with_partial_params(mock_service):
+
+    mock_service.train_model.return_value = {
+        "trained": True,
+        "symbol": "BTC",
+        "message": "Model trained correctly",
+        "new_records": 100,
+        "last_training": "2025-01-01T00:00:00",
+        "observations": 100,
+        "mae": 0.1,
+        "rmse": 0.2,
+        "model_path": "model.joblib"
+    }
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "n_estimators": 500
+            }
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.json()["symbol"] == "BTC"
+
+
+def test_train_api_with_all_params(mock_service):
+
+    mock_service.train_model.return_value = {
+        "trained": True,
+        "symbol": "BTC",
+        "message": "Model trained correctly",
+        "new_records": 100,
+        "last_training": "2025-01-01T00:00:00",
+        "observations": 100,
+        "mae": 0.1,
+        "rmse": 0.2,
+        "model_path": "model.joblib"
+    }
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "n_estimators": 500,
+                "max_depth": 8,
+                "learning_rate": 0.05,
+                "objective": "reg:squarederror",
+                "random_state": 42,
+                "n_jobs": -1
+            }
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.json()["symbol"] == "BTC"
+
+
+def test_train_api_passes_params_to_service(mock_service):
+
+    mock_service.train_model.return_value = {
+        "trained": True,
+        "symbol": "BTC",
+        "message": "Model trained correctly",
+        "new_records": 100,
+        "last_training": "2025-01-01T00:00:00",
+        "observations": 100,
+        "mae": 0.1,
+        "rmse": 0.2,
+        "model_path": "model.joblib"
+    }
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "n_estimators": 500,
+                "learning_rate": 0.05
+            }
+        }
+    )
+
+    assert response.status_code == 200
+
+    mock_service.train_model.assert_called_once_with(
+        symbol="BTC",
+        coin_gecko_id="bitcoin",
+        model_params={
+            "n_estimators": 500,
+            "learning_rate": 0.05
+        }
+    )
+
+
 def test_train_api_invalid_payload():
 
     response = client.post(
@@ -71,6 +172,54 @@ def test_train_api_missing_fields():
         "/models/train",
         json={
             "symbol": "BTC"
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_train_api_invalid_n_estimators():
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "n_estimators": "abc"
+            }
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_train_api_invalid_max_depth():
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "max_depth": "invalid"
+            }
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_train_api_invalid_learning_rate():
+
+    response = client.post(
+        "/models/train",
+        json={
+            "symbol": "BTC",
+            "coin_gecko_id": "bitcoin",
+            "model_params": {
+                "learning_rate": "invalid"
+            }
         }
     )
 

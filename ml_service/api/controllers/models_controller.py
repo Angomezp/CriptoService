@@ -7,9 +7,9 @@ class ModelsController:
 
         self.service = ModelsService()
 
-    def train(self, symbol: str, coin_gecko_id: str):
+    def train(self, symbol: str, coin_gecko_id: str, model_params: dict | None = None):
 
-        return self.service.train_model( symbol=symbol, coin_gecko_id=coin_gecko_id )
+        return self.service.train_model( symbol=symbol, coin_gecko_id=coin_gecko_id, model_params=model_params )
 
     def predict(self, symbol: str):
 

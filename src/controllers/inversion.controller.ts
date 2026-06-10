@@ -1,143 +1,71 @@
 import type { Request, Response } from 'express';
 import InversionService from '../services/inversion.service.js';
 import { AppError } from '../config/http_errors.js';
+import { getBearerToken } from '../handlers/bearer.handler.js';
 
 const inversionService = new InversionService();
 
 export const crearInversion = async (req: Request, res: Response) => {
-    const body = req.body;
+    const { nombrePortafolio, criptomoneda, cantidad } = req.body;
 
-    if (
-        !body ||
-        !body.nombrePortafolio ||
-        !body.criptomoneda ||
-        !body.cantidad
-    ) {
-        return res.status(400).json({
-            message: 'Datos incompletos',
-        });
+    if (!nombrePortafolio || !criptomoneda || !cantidad) {
+        throw new AppError('Datos incompletos', 400, 'VALIDATION_ERROR');
     }
 
-    try {
-        const authHeader = req.headers.authorization;
+    const token = getBearerToken(req);
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                message: 'No autorizado',
-            });
-        }
+    const inversion = await inversionService.createInversion(
+        nombrePortafolio,
+        criptomoneda,
+        cantidad,
+        token
+    );
 
-        const token = authHeader.split(' ')[1]!;
-
-        const inversion = await inversionService.createInversion(
-            body.nombrePortafolio,
-            body.criptomoneda,
-            body.cantidad,
-            token
-        );
-
-        return res.status(201).json({
-            message: 'Inversión creada exitosamente',
-            inversion,
-        });
-    } catch (error) {
-        if (error instanceof AppError) {
-            return res.status(error.statusCode).json({
-                message: error.message,
-                code: error.code,
-                details: error.details,
-            });
-        }
-
-        return res.status(500).json({
-            message: 'Error del servidor al crear la inversión',
-        });
-    }
+    return res.status(201).json({
+        message: 'Inversión creada exitosamente',
+        inversion,
+    });
 };
 
 export const obtenerInversiones = async (req: Request, res: Response) => {
-    const nombrePortafolio = req.body.nombrePortafolio as string;
+    const { nombrePortafolio } = req.body;
 
     if (!nombrePortafolio) {
-        return res.status(400).json({
-            message: 'nombrePortafolio es requerido',
-        });
-    }
-
-    try {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                message: 'No autorizado',
-            });
-        }
-
-        const token = authHeader.split(' ')[1]!;
-
-        const inversiones = await inversionService.getInversiones(
-            nombrePortafolio,
-            token
+        throw new AppError(
+            'Nombre del portafolio es requerido',
+            400,
+            'VALIDATION_ERROR'
         );
-
-        return res.status(200).json({
-            message: 'Inversiones obtenidas exitosamente',
-            inversiones,
-        });
-    } catch (error) {
-        if (error instanceof AppError) {
-            return res.status(error.statusCode).json({
-                message: error.message,
-                code: error.code,
-                details: error.details,
-            });
-        }
-
-        return res.status(500).json({
-            message: 'Error del servidor al obtener las inversiones',
-        });
     }
+
+    const token = getBearerToken(req);
+
+    const inversiones = await inversionService.getInversiones(
+        nombrePortafolio,
+        token
+    );
+
+    return res.status(200).json({
+        message: 'Inversiones obtenidas exitosamente',
+        inversiones,
+    });
 };
 
 export const obtenerInversion = async (req: Request, res: Response) => {
-    try {
-        const authHeader = req.headers.authorization;
+    const idInversion = Number(req.params.idInversion);
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                message: 'No autorizado',
-            });
-        }
-
-        const token = authHeader.split(' ')[1]!;
-
-        const idInversion = Number(req.params.idInversion);
-
-        if (isNaN(idInversion)) {
-            return res.status(400).json({
-                message: 'ID de inversión inválido',
-            });
-        }
-
-        const inversion = await inversionService.getInversionById(
-            idInversion,
-            token
-        );
-
-        return res.status(200).json({
-            inversion,
-        });
-    } catch (error) {
-        if (error instanceof AppError) {
-            return res.status(error.statusCode).json({
-                message: error.message,
-                code: error.code,
-                details: error.details,
-            });
-        }
-
-        return res.status(500).json({
-            message: 'Error del servidor al obtener la inversión',
-        });
+    if (!idInversion || isNaN(idInversion)) {
+        throw new AppError('ID de inversión inválido', 400, 'VALIDATION_ERROR');
     }
+
+    const token = getBearerToken(req);
+
+    const inversion = await inversionService.getInversionById(
+        idInversion,
+        token
+    );
+
+    return res.status(200).json({
+        inversion,
+    });
 };

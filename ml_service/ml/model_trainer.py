@@ -54,24 +54,32 @@ class ModelTrainer:
 
             X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2, shuffle=False ) 
 
-            if model_params is None:
-                model_params = {
-                    "n_estimators": config.DEFAULT_N_ESTIMATORS,
-                    "max_depth": config.DEFAULT_MAX_DEPTH,
-                    "learning_rate": config.DEFAULT_LEARNING_RATE,
-                    "objective": config.DEFAULT_OBJECTIVE,
-                    "random_state": config.DEFAULT_RANDOM_STATE,
-                    "n_jobs": config.DEFAULT_N_JOBS
-                }
+            default_params = {
+                "n_estimators": config.DEFAULT_N_ESTIMATORS,
+                "max_depth": config.DEFAULT_MAX_DEPTH,
+                "learning_rate": config.DEFAULT_LEARNING_RATE,
+                "objective": config.DEFAULT_OBJECTIVE,
+                "random_state": config.DEFAULT_RANDOM_STATE,
+                "n_jobs": config.DEFAULT_N_JOBS
+            }
+
+            if model_params is not None:
+                default_params.update(
+                    {
+                        k: v
+                        for k, v in model_params.items()
+                        if v is not None
+                    }
+                )
 
             model = MultiOutputRegressor(
                 XGBRegressor(
-                    n_estimators = model_params["n_estimators"],
-                    max_depth = model_params["max_depth"],
-                    learning_rate = model_params["learning_rate"],
-                    objective = model_params["objective"],
-                    random_state = model_params["random_state"],
-                     n_jobs = model_params["n_jobs"]
+                    n_estimators = default_params["n_estimators"],
+                    max_depth = default_params["max_depth"],
+                    learning_rate = default_params["learning_rate"],
+                    objective = default_params["objective"],
+                    random_state = default_params["random_state"],
+                    n_jobs = default_params["n_jobs"]
                 )
             )
 
