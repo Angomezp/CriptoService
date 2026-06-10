@@ -1,5 +1,11 @@
 import { env } from './env.js';
 import { DataSource } from 'typeorm';
+import { User } from '../entities/user.entity.js';
+import { Prediccion } from '../entities/prediction.entity.js';
+import { PasswordResetToken } from '../entities/password_reset.entity.js';
+import { Portafolio } from '../entities/portafolio.entity.js';
+import { Inversion } from '../entities/inversion.entity.js';
+
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -11,7 +17,7 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: false,
     ssl: false,
-    entities: ["src/entities/**/*.ts"],  //CHANGE ON PRODUCTION: Use .js for compiled code
+    entities: [User, Prediccion, PasswordResetToken, Portafolio, Inversion], 
     subscribers: [],
     migrations: [],
 });

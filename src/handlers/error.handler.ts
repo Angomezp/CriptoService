@@ -1,18 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../config/http_errors.js";
 
-export function errorHandler(
-    error: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction
-) {
-
+export function errorHandler( error: Error, req: Request, res: Response, next: NextFunction ) {
     if (error instanceof AppError) {
 
-        return res.status(
-            error.statusCode
-        ).json({
+        return res.status(error.statusCode).json({
             success: false,
             code: error.code,
             message: error.message,

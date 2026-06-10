@@ -4,7 +4,7 @@ import 'reflect-metadata';
 import { AppDataSource } from './config/datasource.js';
 import { env } from './config/env.js';
 import router from './config/router.js';
-import { errorHandler } from './handlers/error_handler.middleware.js';
+import { errorHandler } from './handlers/error.handler.js';
 
 async function main() {
   try {

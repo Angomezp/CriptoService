@@ -9,15 +9,11 @@ const router = Router();
 
 
 router.post( "/", authenticate,
-    asyncHandler(
-        predictController
-    )
+    predictController
 );
 
-router.post(  "/hour", authenticate,
-    asyncHandler(
-        predictHourController
-    )
+router.post("/hour", authenticate,
+    asyncHandler( predictHourController )
 );
 
 export default router;

@@ -1,6 +1,6 @@
 import { hashear, verificar } from '../security/hashing.js';
 import UserRepository from '../repositories/user.repository.js';
-import { AppError, ConflictError, ValidationError } from '../config/http_errors.js';
+import { AppError, ConflictError, UnauthorizedError, ValidationError } from '../config/http_errors.js';
 import * as jwtHandler from '../security/jwt.handler.js';
 import * as totpHandler from '../security/totp.handler.js';
 import * as encryptionHandler from '../security/encryption.js';
@@ -51,7 +51,7 @@ export default class AuthService {
             const user = await this.userRepo.findByEmail(correo);
 
             if (!user) {
-                throw new AppError('Credenciales inválidas', 401, 'INVALID_CREDENTIALS');
+                throw new UnauthorizedError('Credenciales inválidas', 'INVALID_CREDENTIALS');
             }
 
             if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {

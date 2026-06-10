@@ -11,10 +11,7 @@ function handleAxiosError( error: unknown ): never {
 }
 
 
-export async function getModels( symbol: string ) {
-    if (!symbol?.trim()) {
-        throw new ValidationError( "Symbol is required" );
-    }
+export async function getModels() {
     try {
         const response = await axios.get(
             `${env.mlServiceUrl}/models`,

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes  from '../routes/auth.routes.js';
-import predictionRoutes from '../routes/ml.routes.js';
+import predictionRoutes from '../routes/prediction.routes.js';
+import modelsRoutes from '../routes/models.routes.js';
 
 const router = Router();
 
@@ -11,6 +12,8 @@ router.get('/health', (req, res) => {
 
 router.use('/auth', authRoutes);
 
-router.use( "/predict",  predictionRoutes );
+router.use('/predict', predictionRoutes );
+
+router.use('/models', modelsRoutes);
 
 export default router;
