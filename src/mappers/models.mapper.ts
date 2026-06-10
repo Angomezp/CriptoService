@@ -1,6 +1,6 @@
-import type { ModelResponseDto } from "../dtos/model_response.dto.js";
+import type { ModelResponseDto } from '../dtos/model_response.dto.js';
 
-export function toModelResponse(  model: any ): ModelResponseDto {
+export function toModelResponse(model: any): ModelResponseDto {
     return {
         model_name: model.model_name,
         model_algorithm: model.model_algorithm,
@@ -9,10 +9,10 @@ export function toModelResponse(  model: any ): ModelResponseDto {
         rmse: model.rmse,
         active: model.active,
         symbol: model.symbol,
-        training_date: model.training_date
+        training_date: model.training_date,
     };
 }
 
-export function toModelResponseList( models: any[] ) {
-    return models.map( toModelResponse );
+export function toModelResponseList(models: any[]) {
+    return models.map(toModelResponse);
 }

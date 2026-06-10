@@ -1,5 +1,5 @@
-import { AppDataSource } from "./datasource.js";
-import { DataSource } from "typeorm";
+import { appDataSource } from './datasource.js';
+import type { DataSource } from 'typeorm';
 
 export class Database {
     private static instance: DataSource | null = null;
@@ -8,7 +8,7 @@ export class Database {
 
     public static getInstance(): DataSource {
         if (!Database.instance) {
-            Database.instance = AppDataSource;
+            Database.instance = appDataSource;
         }
         return Database.instance;
     }

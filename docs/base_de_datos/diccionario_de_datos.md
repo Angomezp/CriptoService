@@ -9,14 +9,14 @@
 
 Almacena la información de los usuarios registrados en el sistema, incluyendo credenciales de autenticación y configuración de MFA.
 
-| Campo | Tipo de dato | Longitud | PK / FK | Restricciones | Descripción |
-|---|---|---|---|---|---|
-| id_usuario | serial | - | PK | NOT NULL, AUTO | Identificador único del usuario. Se autoincrementa. |
-| nombre | varchar | 100 | - | NOT NULL | Nombre completo del usuario. Cifrado con AES-256. |
-| correo | varchar | 255 | - | NOT NULL, UNIQUE | Correo electrónico del usuario. Cifrado con AES-256. No puede repetirse. |
-| password_hash | varchar | 255 | - | NOT NULL | Hash de la contraseña generado con bcrypt. Nunca se almacena la contraseña en texto plano. |
-| totp_secret | varchar | 255 | - | NULL permitido | Clave secreta para TOTP (Google Authenticator). Cifrada con AES-256. NULL si el usuario no ha activado MFA. |
-| mfa_enabled | boolean | - | - | NOT NULL, DEFAULT false | Indica si el usuario tiene MFA activado. false por defecto hasta que confirme el primer código TOTP. |
+| Campo         | Tipo de dato | Longitud | PK / FK | Restricciones           | Descripción                                                                                                 |
+| ------------- | ------------ | -------- | ------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| id_usuario    | serial       | -        | PK      | NOT NULL, AUTO          | Identificador único del usuario. Se autoincrementa.                                                         |
+| nombre        | varchar      | 100      | -       | NOT NULL                | Nombre completo del usuario. Cifrado con AES-256.                                                           |
+| correo        | varchar      | 255      | -       | NOT NULL, UNIQUE        | Correo electrónico del usuario. Cifrado con AES-256. No puede repetirse.                                    |
+| password_hash | varchar      | 255      | -       | NOT NULL                | Hash de la contraseña generado con bcrypt. Nunca se almacena la contraseña en texto plano.                  |
+| totp_secret   | varchar      | 255      | -       | NULL permitido          | Clave secreta para TOTP (Google Authenticator). Cifrada con AES-256. NULL si el usuario no ha activado MFA. |
+| mfa_enabled   | boolean      | -        | -       | NOT NULL, DEFAULT false | Indica si el usuario tiene MFA activado. false por defecto hasta que confirme el primer código TOTP.        |
 
 ---
 
@@ -24,12 +24,12 @@ Almacena la información de los usuarios registrados en el sistema, incluyendo c
 
 Representa el portafolio de inversiones de un usuario. Un usuario puede tener múltiples portafolios.
 
-| Campo | Tipo de dato | Longitud | PK / FK | Restricciones | Descripción |
-|---|---|---|---|---|---|
-| id_portafolio | serial | - | PK | NOT NULL, AUTO | Identificador único del portafolio. Se autoincrementa. |
-| id_usuario | integer | - | FK → usuario | NOT NULL | Referencia al usuario propietario del portafolio. Un usuario puede tener muchos portafolios. |
-| nombre_portafolio | varchar | 100 | - | NOT NULL | Nombre descriptivo del portafolio asignado por el usuario. |
-| fecha_creacion | timestamp | - | - | NOT NULL, DEFAULT now() | Fecha y hora de creación del portafolio. Se genera automáticamente. |
+| Campo             | Tipo de dato | Longitud | PK / FK      | Restricciones           | Descripción                                                                                  |
+| ----------------- | ------------ | -------- | ------------ | ----------------------- | -------------------------------------------------------------------------------------------- |
+| id_portafolio     | serial       | -        | PK           | NOT NULL, AUTO          | Identificador único del portafolio. Se autoincrementa.                                       |
+| id_usuario        | integer      | -        | FK → usuario | NOT NULL                | Referencia al usuario propietario del portafolio. Un usuario puede tener muchos portafolios. |
+| nombre_portafolio | varchar      | 100      | -            | NOT NULL                | Nombre descriptivo del portafolio asignado por el usuario.                                   |
+| fecha_creacion    | timestamp    | -        | -            | NOT NULL, DEFAULT now() | Fecha y hora de creación del portafolio. Se genera automáticamente.                          |
 
 ---
 
@@ -37,17 +37,16 @@ Representa el portafolio de inversiones de un usuario. Un usuario puede tener m�
 
 Registra cada inversión individual dentro de un portafolio. Almacena la criptomoneda, cantidad y costo al momento de la inversión.
 
-| Campo | Tipo de dato | Longitud | PK / FK | Restricciones | Descripción |
-|---|---|---|---|---|---|
-| id_inversion | serial | - | PK | NOT NULL, AUTO | Identificador único de la inversión. Se autoincrementa. |
-| id_portafolio | integer | - | FK → portafolio | NOT NULL | Referencia al portafolio al que pertenece la inversión. Un portafolio puede tener muchas inversiones. |
-| criptomoneda | varchar | 50 | - | NOT NULL | Nombre o símbolo de la criptomoneda invertida. Ejemplo: BTC, ETH. |
-| cantidad | numeric | 18,8 | - | NOT NULL | Cantidad de criptomoneda adquirida. Hasta 8 decimales para precisión en cripto. |
-| costo_inicial | numeric | 18,2 | - | NOT NULL | Precio total pagado por la cantidad de criptomoneda al momento de la inversión, en USD. |
-| fecha_inversion | timestamp | - | - | NOT NULL, DEFAULT now() | Fecha y hora en que se registró la inversión. |
+| Campo           | Tipo de dato | Longitud | PK / FK         | Restricciones           | Descripción                                                                                           |
+| --------------- | ------------ | -------- | --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| id_inversion    | serial       | -        | PK              | NOT NULL, AUTO          | Identificador único de la inversión. Se autoincrementa.                                               |
+| id_portafolio   | integer      | -        | FK → portafolio | NOT NULL                | Referencia al portafolio al que pertenece la inversión. Un portafolio puede tener muchas inversiones. |
+| criptomoneda    | varchar      | 50       | -               | NOT NULL                | Nombre o símbolo de la criptomoneda invertida. Ejemplo: BTC, ETH.                                     |
+| cantidad        | numeric      | 18,8     | -               | NOT NULL                | Cantidad de criptomoneda adquirida. Hasta 8 decimales para precisión en cripto.                       |
+| costo_inicial   | numeric      | 18,2     | -               | NOT NULL                | Precio total pagado por la cantidad de criptomoneda al momento de la inversión, en USD.               |
+| fecha_inversion | timestamp    | -        | -               | NOT NULL, DEFAULT now() | Fecha y hora en que se registró la inversión.                                                         |
 
 ---
-
 
 ## Tabla: `crypto_prices`
 
@@ -64,12 +63,12 @@ Almacena el histórico de precios de las criptomonedas utilizado para entrenamie
 
 ### Restricciones adicionales
 
-* Restricción única sobre `(symbol, time_stamp)` para evitar registros duplicados de una misma criptomoneda en la misma fecha y hora.
+- Restricción única sobre `(symbol, time_stamp)` para evitar registros duplicados de una misma criptomoneda en la misma fecha y hora.
 
 ### Índices
 
-* `idx_price_symbol`: optimiza búsquedas por símbolo.
-* `idx_price_symbol_time_stamp`: optimiza consultas históricas por símbolo y fecha.
+- `idx_price_symbol`: optimiza búsquedas por símbolo.
+- `idx_price_symbol_time_stamp`: optimiza consultas históricas por símbolo y fecha.
 
 ---
 
@@ -93,9 +92,8 @@ Almacena la información de los modelos de aprendizaje automático entrenados pa
 
 ### Índices
 
-* `idx_model_metadata_active`: optimiza consultas sobre modelos activos.
-* `idx_model_metadata_symbol_active`: optimiza búsquedas de modelos activos por criptomoneda.
-
+- `idx_model_metadata_active`: optimiza consultas sobre modelos activos.
+- `idx_model_metadata_symbol_active`: optimiza búsquedas de modelos activos por criptomoneda.
 
 ### Nota
 
@@ -105,14 +103,11 @@ Cuando se entrena un nuevo modelo para un símbolo específico, todos los modelo
 
 Por ejemplo, si existen tres modelos entrenados para BTC y se genera un cuarto modelo, los tres modelos anteriores serán marcados como inactivos (`active = FALSE`) y únicamente el modelo más reciente quedará activo (`active = TRUE`).
 
-
-
-
 ## Relaciones
 
-| Relación | Tipo | Descripción |
-|---|---|---|
-| usuario → portafolio | 1 a N | Un usuario puede tener muchos portafolios. Un portafolio pertenece a exactamente un usuario. |
+| Relación               | Tipo  | Descripción                                                                                        |
+| ---------------------- | ----- | -------------------------------------------------------------------------------------------------- |
+| usuario → portafolio   | 1 a N | Un usuario puede tener muchos portafolios. Un portafolio pertenece a exactamente un usuario.       |
 | portafolio → inversion | 1 a N | Un portafolio puede tener muchas inversiones. Una inversión pertenece a exactamente un portafolio. |
 
 ---

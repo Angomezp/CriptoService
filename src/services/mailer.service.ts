@@ -4,14 +4,17 @@ import { env } from '../config/env.js';
 const transporter = nodemailer.createTransport({
     host: env.smtpHost,
     port: env.smtpPort,
-    secure: env.smtpPort === 465, 
+    secure: env.smtpPort === 465,
     auth: {
         user: env.smtpUser,
         pass: env.smtpPass,
     },
 });
 
-export async function enviarCorreoRecuperacion(destino: string, link: string): Promise<void> {
+export async function enviarCorreoRecuperacion(
+    destino: string,
+    link: string
+): Promise<void> {
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #2c3e50;">Recupera tu contraseña</h2>
@@ -56,7 +59,11 @@ Si no solicitaste esto, ignora este correo.
     });
 }
 
-export async function enviarAlertaBloqueo(destino: string, minutosBloqueo: number, appUrl: string): Promise<void> {
+export async function enviarAlertaBloqueo(
+    destino: string,
+    minutosBloqueo: number,
+    appUrl: string
+): Promise<void> {
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #c0392b;">Alerta de seguridad</h2>

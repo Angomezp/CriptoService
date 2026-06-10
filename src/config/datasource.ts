@@ -6,9 +6,8 @@ import { PasswordResetToken } from '../entities/password_reset.entity.js';
 import { Portafolio } from '../entities/portafolio.entity.js';
 import { Inversion } from '../entities/inversion.entity.js';
 
-
-export const AppDataSource = new DataSource({
-    type: "postgres",
+export const appDataSource = new DataSource({
+    type: 'postgres',
     host: env.dbHost,
     port: env.dbPort,
     username: env.dbUser,
@@ -17,7 +16,7 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: false,
     ssl: false,
-    entities: [User, Prediccion, PasswordResetToken, Portafolio, Inversion], 
+    entities: [User, Prediccion, PasswordResetToken, Portafolio, Inversion],
     subscribers: [],
     migrations: [],
 });

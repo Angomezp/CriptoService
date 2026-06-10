@@ -1,6 +1,11 @@
 import { hashear, verificar } from '../security/hashing.js';
 import UserRepository from '../repositories/user.repository.js';
-import { AppError, ConflictError, UnauthorizedError, ValidationError } from '../config/http_errors.js';
+import {
+    AppError,
+    ConflictError,
+    UnauthorizedError,
+    ValidationError,
+} from '../config/http_errors.js';
 import * as jwtHandler from '../security/jwt.handler.js';
 import * as totpHandler from '../security/totp.handler.js';
 import * as encryptionHandler from '../security/encryption.js';
@@ -8,12 +13,13 @@ import { env } from '../config/env.js';
 import crypto from 'crypto';
 import { PasswordResetToken } from '../entities/password_reset.entity.js';
 import { Database } from '../config/database.js';
-import { enviarCorreoRecuperacion, enviarAlertaBloqueo } from './mailer.service.js';
+import {
+    enviarCorreoRecuperacion,
+    enviarAlertaBloqueo,
+} from './mailer.service.js';
 import { User } from '../entities/user.entity.js';
 
-
 export default class AuthService {
-
     private userRepo: UserRepository;
 
     constructor() {
@@ -36,13 +42,29 @@ export default class AuthService {
             }
 
             const hashedPassword = await hashear(password);
-            const user = await this.userRepo.createUser({ nombre: nombre, correo: correo, passwordHash: hashedPassword });
+            const user = await this.userRepo.createUser({
+                nombre: nombre,
+                correo: correo,
+                passwordHash: hashedPassword,
+            });
 
-            return { message: 'Usuario registrado exitosamente', nombre: user.nombre, correo: user.correo };
-        } catch (error: any) {
-            if (error instanceof AppError) throw error;
-            throw new AppError('Error al registrar el usuario', 500, 'REGISTER_ERROR', {
-                originalMessage: (error as Error)?.message});
+            return {
+                message: 'Usuario registrado exitosamente',
+                nombre: user.nombre,
+                correo: user.correo,
+            };
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new AppError(
+                'Error al registrar el usuario',
+                500,
+                'REGISTER_ERROR',
+                {
+                    originalMessage: (error as Error)?.message,
+                }
+            );
         }
     }
 
@@ -51,7 +73,10 @@ export default class AuthService {
             const user = await this.userRepo.findByEmail(correo);
 
             if (!user) {
-                throw new UnauthorizedError('Credenciales inválidas', 'INVALID_CREDENTIALS');
+                throw new UnauthorizedError(
+                    'Credenciales inválidas',
+                    'INVALID_CREDENTIALS'
+                );
             }
 
             if (user.bloqueadoHasta && user.bloqueadoHasta > new Date()) {
@@ -72,9 +97,16 @@ export default class AuthService {
                 const intentosActuales = user.intentosFallidos + 1;
 
                 if (intentosActuales >= env.maxIntentosLogin) {
-                    await this.userRepo.bloquearUsuario(user.idUsuario, env.bloqueoMinutos);
+                    await this.userRepo.bloquearUsuario(
+                        user.idUsuario,
+                        env.bloqueoMinutos
+                    );
 
-                     enviarAlertaBloqueo(user.correo, env.bloqueoMinutos, env.appUrl).catch((err) => {
+                    enviarAlertaBloqueo(
+                        user.correo,
+                        env.bloqueoMinutos,
+                        env.appUrl
+                    ).catch((err) => {
                         console.error('Error enviando alerta de bloqueo:', err);
                     });
 
@@ -99,17 +131,22 @@ export default class AuthService {
                 return {
                     mfaToken: mfaToken,
                     message: 'Contraseña correcta, ingresa el código MFA',
-                    mfa_requerido: true
+                    mfa_requerido: true,
                 };
             }
 
             const token = jwtHandler.generarToken(user.idUsuario);
-            return { message: 'Inicio de sesión exitoso', token: token, mfa_requerido: false };
-
-        } catch (error: any) {
-            if (error instanceof AppError) throw error;
+            return {
+                message: 'Inicio de sesión exitoso',
+                token: token,
+                mfa_requerido: false,
+            };
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new AppError('Error al iniciar sesión', 500, 'LOGIN_ERROR', {
-                originalMessage: (error as Error)?.message
+                originalMessage: (error as Error)?.message,
             });
         }
     }
@@ -118,32 +155,57 @@ export default class AuthService {
         try {
             const payload = jwtHandler.verificarMfaToken(mfaToken);
             if (!payload || payload.scope !== 'PRE_AUTH') {
-                throw new AppError('Token MFA inválido', 401, 'INVALID_MFA_TOKEN');
+                throw new AppError(
+                    'Token MFA inválido',
+                    401,
+                    'INVALID_MFA_TOKEN'
+                );
             }
 
             const user = await this.userRepo.findById(payload.userId);
             if (!user) {
-                throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
+                throw new AppError(
+                    'Usuario no encontrado',
+                    404,
+                    'USER_NOT_FOUND'
+                );
             }
 
             if (!user.totpSecret) {
-                throw new AppError('MFA no configurado para el usuario', 400, 'MFA_NOT_CONFIGURED');
+                throw new AppError(
+                    'MFA no configurado para el usuario',
+                    400,
+                    'MFA_NOT_CONFIGURED'
+                );
             }
 
             const secretoDesc = encryptionHandler.descifrar(user.totpSecret);
-            const valido = await totpHandler.verificarTokenTOTP(codigo_totp, secretoDesc);
+            const valido = await totpHandler.verificarTokenTOTP(
+                codigo_totp,
+                secretoDesc
+            );
             if (!valido) {
-                throw new AppError('Código MFA inválido', 401, 'INVALID_MFA_CODE');
+                throw new AppError(
+                    'Código MFA inválido',
+                    401,
+                    'INVALID_MFA_CODE'
+                );
             }
 
             const token = jwtHandler.generarToken(user.idUsuario);
             return token;
-
-        } catch (error: any) {
-            if (error instanceof AppError) throw error;
-            throw new AppError('Error al verificar MFA', 500, 'VERIFY_MFA_ERROR', {
-                originalMessage: (error as Error)?.message,
-            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new AppError(
+                'Error al verificar MFA',
+                500,
+                'VERIFY_MFA_ERROR',
+                {
+                    originalMessage: (error as Error)?.message,
+                }
+            );
         }
     }
 
@@ -156,9 +218,9 @@ export default class AuthService {
         if (!user) {
             throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
         }
-        const totp = totpHandler.generarSecret(); 
-        const TOTPSecret = encryptionHandler.cifrar(totp);
-        await this.userRepo.updateMfaSecret(user.idUsuario, TOTPSecret, false);
+        const totp = totpHandler.generarSecret();
+        const totpSecret = encryptionHandler.cifrar(totp);
+        await this.userRepo.updateMfaSecret(user.idUsuario, totpSecret, false);
         const uri = totpHandler.generarUriTOTP(user.correo, totp);
         const qrCode = await totpHandler.generarCodigoQR(uri);
         return { qrCode };
@@ -174,14 +236,25 @@ export default class AuthService {
             throw new AppError('Usuario no encontrado', 404, 'USER_NOT_FOUND');
         }
         if (!user.totpSecret) {
-            throw new AppError('MFA no configurado para el usuario', 400, 'MFA_NOT_CONFIGURED');
+            throw new AppError(
+                'MFA no configurado para el usuario',
+                400,
+                'MFA_NOT_CONFIGURED'
+            );
         }
         const secretoDesc = encryptionHandler.descifrar(user.totpSecret);
-        const valido = await totpHandler.verificarTokenTOTP(codigo_totp, secretoDesc);
+        const valido = await totpHandler.verificarTokenTOTP(
+            codigo_totp,
+            secretoDesc
+        );
         if (!valido) {
             throw new AppError('Código MFA inválido', 401, 'INVALID_MFA_CODE');
         }
-        await this.userRepo.updateMfaSecret(user.idUsuario, user.totpSecret!, true);
+        await this.userRepo.updateMfaSecret(
+            user.idUsuario,
+            user.totpSecret!,
+            true
+        );
     }
 
     public async solicitarRecuperacion(correo: string) {
@@ -189,16 +262,22 @@ export default class AuthService {
             const user = await this.userRepo.findByEmail(correo);
 
             if (!user) {
-                return { message: 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.' };
+                return {
+                    message:
+                        'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
+                };
             }
 
             const token = crypto.randomBytes(32).toString('hex');
 
             const tokenHash = await hashear(token);
 
-            const expiraEn = new Date(Date.now() + env.passwordResetTtlMin * 60 * 1000);
+            const expiraEn = new Date(
+                Date.now() + env.passwordResetTtlMin * 60 * 1000
+            );
 
-            const tokenRepo = Database.getInstance().getRepository(PasswordResetToken);
+            const tokenRepo =
+                Database.getInstance().getRepository(PasswordResetToken);
             const nuevoToken = tokenRepo.create({
                 usuario: user,
                 tokenHash: tokenHash,
@@ -213,19 +292,33 @@ export default class AuthService {
                 console.error('Error enviando correo de recuperación:', err);
             });
 
-            return { message: 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.' };
-
-        } catch (error: any) {
-            if (error instanceof AppError) throw error;
-            throw new AppError('Error al procesar la solicitud', 500, 'FORGOT_PASSWORD_ERROR', {
-                originalMessage: (error as Error)?.message,
-            });
+            return {
+                message:
+                    'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
+            };
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new AppError(
+                'Error al procesar la solicitud',
+                500,
+                'FORGOT_PASSWORD_ERROR',
+                {
+                    originalMessage: (error as Error)?.message,
+                }
+            );
         }
     }
 
-    public async restablecerPassword(idToken: number, token: string, nuevaPassword: string) {
+    public async restablecerPassword(
+        idToken: number,
+        token: string,
+        nuevaPassword: string
+    ) {
         try {
-            const tokenRepo = Database.getInstance().getRepository(PasswordResetToken);
+            const tokenRepo =
+                Database.getInstance().getRepository(PasswordResetToken);
 
             const registro = await tokenRepo.findOne({
                 where: { idToken: idToken },
@@ -233,20 +326,36 @@ export default class AuthService {
             });
 
             if (!registro) {
-                throw new AppError('Token inválido o expirado', 400, 'INVALID_RESET_TOKEN');
+                throw new AppError(
+                    'Token inválido o expirado',
+                    400,
+                    'INVALID_RESET_TOKEN'
+                );
             }
 
             if (registro.usado) {
-                throw new AppError('Este enlace ya fue utilizado', 400, 'TOKEN_ALREADY_USED');
+                throw new AppError(
+                    'Este enlace ya fue utilizado',
+                    400,
+                    'TOKEN_ALREADY_USED'
+                );
             }
 
             if (registro.expiraEn < new Date()) {
-                throw new AppError('El enlace ha expirado', 400, 'TOKEN_EXPIRED');
+                throw new AppError(
+                    'El enlace ha expirado',
+                    400,
+                    'TOKEN_EXPIRED'
+                );
             }
 
             const tokenValido = await verificar(token, registro.tokenHash);
             if (!tokenValido) {
-                throw new AppError('Token inválido', 400, 'INVALID_RESET_TOKEN');
+                throw new AppError(
+                    'Token inválido',
+                    400,
+                    'INVALID_RESET_TOKEN'
+                );
             }
 
             const validacion = this.isValidPassword(nuevaPassword);
@@ -267,42 +376,47 @@ export default class AuthService {
             await tokenRepo.save(registro);
 
             return { message: 'Contraseña actualizada exitosamente' };
-
-        } catch (error: any) {
-            if (error instanceof AppError) throw error;
-            throw new AppError('Error al restablecer la contraseña', 500, 'RESET_PASSWORD_ERROR', {
-                originalMessage: (error as Error)?.message,
-            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new AppError(
+                'Error al restablecer la contraseña',
+                500,
+                'RESET_PASSWORD_ERROR',
+                {
+                    originalMessage: (error as Error)?.message,
+                }
+            );
         }
     }
 
-    private isValidPassword(password: string): String | boolean {
+    private isValidPassword(password: string): string | boolean {
         if (password.length < 8) {
-            return "La contraseña debe tener al menos 8 caracteres";
+            return 'La contraseña debe tener al menos 8 caracteres';
         }
         if (!/[A-Z]/.test(password)) {
-            return "La contraseña debe contener al menos una letra mayúscula";
+            return 'La contraseña debe contener al menos una letra mayúscula';
         }
 
         if (!/[a-z]/.test(password)) {
-            return "La contraseña debe contener al menos una letra minúscula";
+            return 'La contraseña debe contener al menos una letra minúscula';
         }
 
         if (!/[0-9]/.test(password)) {
-            return "La contraseña debe contener al menos un número";
+            return 'La contraseña debe contener al menos un número';
         }
         if (!/[!@#$%^&*(),.?":{}|/<>]/.test(password)) {
-            return "La contraseña debe contener al menos un carácter especial";
+            return 'La contraseña debe contener al menos un carácter especial';
         }
         if (/\s/.test(password)) {
-            return "La contraseña no debe contener espacios";
+            return 'La contraseña no debe contener espacios';
         }
-        return true; 
+        return true;
     }
 
     private isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
-
 }

@@ -28,32 +28,36 @@ interface EnvConfig {
 
 function validateEnv() {
     const requiredEnvVars = [
-        'SV_PORT', 
-        'DB_HOST', 
-        'DB_PORT', 
-        'DB_USER', 
-        'DB_PASSWORD', 
+        'SV_PORT',
+        'DB_HOST',
+        'DB_PORT',
+        'DB_USER',
+        'DB_PASSWORD',
         'DB_NAME',
-        'DB_TYPE' ,
-        'ENCRYPTION_KEY', 
-        'JWT_SECRET', 
-        'JWT_MFA_SECRET', 
-        'MAX_INTENTOS_LOGIN', 
-        'BLOQUEO_MINUTOS', 
-        'SMTP_HOST', 
-        'SMTP_PORT', 
-        'SMTP_USER', 
-        'SMTP_PASS', 
-        'SMTP_FROM', 
-        'APP_URL', 
+        'DB_TYPE',
+        'ENCRYPTION_KEY',
+        'JWT_SECRET',
+        'JWT_MFA_SECRET',
+        'MAX_INTENTOS_LOGIN',
+        'BLOQUEO_MINUTOS',
+        'SMTP_HOST',
+        'SMTP_PORT',
+        'SMTP_USER',
+        'SMTP_PASS',
+        'SMTP_FROM',
+        'APP_URL',
         'PASSWORD_RESET_TTL_MIN',
         'ML_API_KEY',
-        'ML_SERVICE_URL'
+        'ML_SERVICE_URL',
     ];
-    const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+    const missingEnvVars = requiredEnvVars.filter(
+        (varName) => !process.env[varName]
+    );
 
     if (missingEnvVars.length > 0) {
-        throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+        throw new Error(
+            `Missing required environment variables: ${missingEnvVars.join(', ')}`
+        );
     }
 }
 
@@ -61,7 +65,7 @@ validateEnv();
 
 export const env: EnvConfig = {
     serverPort: Number(process.env.SV_PORT),
-    dbHost: process.env.DB_HOST as string, 
+    dbHost: process.env.DB_HOST as string,
     dbPort: Number(process.env.DB_PORT),
     dbUser: process.env.DB_USER as string,
     dbPassword: process.env.DB_PASSWORD as string,
@@ -80,5 +84,5 @@ export const env: EnvConfig = {
     appUrl: process.env.APP_URL as string,
     passwordResetTtlMin: Number(process.env.PASSWORD_RESET_TTL_MIN),
     mlApiKey: process.env.ML_API_KEY as string,
-    mlServiceUrl: process.env.ML_SERVICE_URL as string
+    mlServiceUrl: process.env.ML_SERVICE_URL as string,
 };

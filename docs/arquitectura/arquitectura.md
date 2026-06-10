@@ -26,11 +26,11 @@ Esta decisión no convierte la arquitectura en microservicios porque solo se ext
 
 Internamente, el monolito se organiza en capas con una dirección de dependencia estricta: cada capa solo conoce a la capa inmediatamente inferior y nunca al revés.
 
-| Capa | Responsabilidad Técnica |
-|---|---|
-| **Capa de Presentación (Controllers)** | Punto de entrada de la API. Recibe las peticiones HTTP externas, extrae los parámetros, valida los datos de entrada y delega el trabajo al servicio correspondiente. |
-| **Servicios (Services)** | Capa del núcleo o lógica de negocio. Es donde se procesan las reglas del sistema (cálculos de portafolios, lógica de registro, predicciones) y se coordinan las llamadas a los módulos de apoyo. |
-| **Repositorios (Repositories)** | Capa de acceso a datos. Su única función es comunicarse con PostgreSQL para consultar, insertar o actualizar la información utilizando los modelos como estructura. |
+| Capa                                   | Responsabilidad Técnica                                                                                                                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Capa de Presentación (Controllers)** | Punto de entrada de la API. Recibe las peticiones HTTP externas, extrae los parámetros, valida los datos de entrada y delega el trabajo al servicio correspondiente.                             |
+| **Servicios (Services)**               | Capa del núcleo o lógica de negocio. Es donde se procesan las reglas del sistema (cálculos de portafolios, lógica de registro, predicciones) y se coordinan las llamadas a los módulos de apoyo. |
+| **Repositorios (Repositories)**        | Capa de acceso a datos. Su única función es comunicarse con PostgreSQL para consultar, insertar o actualizar la información utilizando los modelos como estructura.                              |
 
 ```
 Controllers
@@ -130,19 +130,18 @@ ml_service/
 
 El servicio auxiliar de Machine Learning se encarga de recopilar y almacenar datos históricos de mercado, entrenar modelos predictivos basados en XGBoost, gestionar versiones de modelos entrenados y exponer una API REST para realizar predicciones sobre criptomonedas.
 
-
 ---
 
 ## 3. Módulo de seguridad
 
 La capa de seguridad es transversal, es decir, no pertenece a un solo dominio sino que es invocada por todos los services según lo requieran.
 
-| Módulo | Tecnología | Responsabilidad |
-|---|---|---|
-| encryption | AES-256 | Cifrar y descifrar datos personales (nombre, correo, totp_secret) |
-| hashing | bcrypt | Hashear contraseñas al registrar y verificarlas al hacer login |
-| jwt_handler | JWT | Generar el token de sesión tras login exitoso y verificarlo en cada petición |
-| totp_handler | TOTP (RFC 6238) | Generar la clave secreta, el QR y verificar el código de 6 dígitos del MFA |
+| Módulo       | Tecnología      | Responsabilidad                                                              |
+| ------------ | --------------- | ---------------------------------------------------------------------------- |
+| encryption   | AES-256         | Cifrar y descifrar datos personales (nombre, correo, totp_secret)            |
+| hashing      | bcrypt          | Hashear contraseñas al registrar y verificarlas al hacer login               |
+| jwt_handler  | JWT             | Generar el token de sesión tras login exitoso y verificarlo en cada petición |
+| totp_handler | TOTP (RFC 6238) | Generar la clave secreta, el QR y verificar el código de 6 dígitos del MFA   |
 
 ---
 
@@ -187,4 +186,3 @@ El sistema se despliega en un servidor en la nube con dos procesos corriendo sim
 Ambos procesos corren en el mismo servidor. La comunicación entre ellos es local por HTTP. Los servicios externos (CoinGecko) son consumidos por el monolito y el servicio de ML mediante HTTP, en sus debidas tareas.
 
 ---
-

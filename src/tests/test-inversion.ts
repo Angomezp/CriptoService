@@ -5,15 +5,15 @@ const service = new InversionService();
 async function test() {
     try {
         const result = await service.createInversion(
-            "Criptos largo plazo",
-            "bitcoin",
+            'Criptos largo plazo',
+            'bitcoin',
             0.01,
-            "TU_TOKEN_AQUI"
+            'TU_TOKEN_AQUI'
         );
 
-        console.log("RESULTADO:", result);
+        console.log('RESULTADO:', result);
     } catch (err) {
-        console.error("ERROR:", err);
+        console.error('ERROR:', err);
     }
 }
 

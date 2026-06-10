@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { crearInversion, obtenerInversion, obtenerInversiones } from '../controllers/inversion.controller.js';
+import {
+    crearInversion,
+    obtenerInversion,
+    obtenerInversiones,
+} from '../controllers/inversion.controller.js';
 
 const router = Router();
 

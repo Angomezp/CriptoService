@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { crearPortafolio, obtenerPortafolios } from '../controllers/portafolio.controller.js';
+import {
+    crearPortafolio,
+    obtenerPortafolios,
+} from '../controllers/portafolio.controller.js';
 
 const router = Router();
 
