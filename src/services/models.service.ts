@@ -3,6 +3,9 @@ import { env } from '../config/env.js';
 import { AppError, ValidationError } from '../config/http_errors.js';
 
 function handleAxiosError(error: unknown): never {
+    console.log('ERROR RECIBIDO:', error);
+    console.log('IS AXIOS:', axios.isAxiosError(error));
+
     if (axios.isAxiosError(error)) {
         throw new AppError(
             error.response?.data?.detail ?? 'ML Service Error',
@@ -10,6 +13,7 @@ function handleAxiosError(error: unknown): never {
             'ML_SERVICE_ERROR'
         );
     }
+
     throw error;
 }
 

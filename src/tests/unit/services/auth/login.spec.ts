@@ -30,10 +30,6 @@ vi.mock('../../../../services/mailer.service.js', () => ({
     enviarCorreoRecuperacion: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../../../../services/mailer.service.js', () => ({
-    enviarAlertaBloqueo: vi.fn(),
-}));
-
 describe('AuthService - login', () => {
     let authService: AuthService;
 

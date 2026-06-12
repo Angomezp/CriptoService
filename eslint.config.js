@@ -93,7 +93,7 @@ export default [
     },
 
     {
-        files: ['tests/**/*.test.ts', 'tests/**/*.spec.ts'],
+        files: ['src/tests/**'],
         rules: {
             '@typescript-eslint/no-explicit-any': 'off',
 
