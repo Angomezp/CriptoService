@@ -9,7 +9,11 @@ export const crearPortafolio = async (req: Request, res: Response) => {
     const { nombrePortafolio } = req.body;
 
     if (!nombrePortafolio) {
-        throw new AppError('Nombre del portafolio es requerido', 400, 'VALIDATION_ERROR');
+        throw new AppError(
+            'Nombre del portafolio es requerido',
+            400,
+            'VALIDATION_ERROR'
+        );
     }
     const token = getBearerToken(req);
 
@@ -21,7 +25,6 @@ export const crearPortafolio = async (req: Request, res: Response) => {
         message: 'Portafolio creado exitosamente',
         portafolio,
     });
-    
 };
 
 export const obtenerPortafolios = async (req: Request, res: Response) => {
@@ -31,5 +34,4 @@ export const obtenerPortafolios = async (req: Request, res: Response) => {
     return res.status(200).json({
         portafolios,
     });
-    
 };
