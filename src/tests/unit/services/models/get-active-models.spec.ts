@@ -46,9 +46,7 @@ describe('getAllActiveModels', () => {
         mockAxios.get.mockRejectedValue(error);
         mockAxios.isAxiosError.mockReturnValue(true);
 
-        await expect(
-            getAllActiveModels()
-        ).rejects.toMatchObject({
+        await expect(getAllActiveModels()).rejects.toMatchObject({
             code: 'ML_SERVICE_ERROR',
             statusCode: 500,
         });
@@ -60,8 +58,6 @@ describe('getAllActiveModels', () => {
         mockAxios.get.mockRejectedValue(error);
         mockAxios.isAxiosError.mockReturnValue(false);
 
-        await expect(
-            getAllActiveModels()
-        ).rejects.toThrow('Unknown');
+        await expect(getAllActiveModels()).rejects.toThrow('Unknown');
     });
 });

@@ -27,9 +27,7 @@ describe('getAllActiveModelsBySymbol', () => {
     });
 
     it('should throw ValidationError when symbol is empty', async () => {
-        await expect(
-            getAllActiveModelsBySymbol('')
-        ).rejects.toMatchObject({
+        await expect(getAllActiveModelsBySymbol('')).rejects.toMatchObject({
             message: 'Symbol is required',
         });
     });
@@ -47,9 +45,7 @@ describe('getAllActiveModelsBySymbol', () => {
         mockAxios.get.mockRejectedValue(error);
         mockAxios.isAxiosError.mockReturnValue(true);
 
-        await expect(
-            getAllActiveModelsBySymbol('BTC')
-        ).rejects.toMatchObject({
+        await expect(getAllActiveModelsBySymbol('BTC')).rejects.toMatchObject({
             code: 'ML_SERVICE_ERROR',
             statusCode: 404,
         });
@@ -61,8 +57,8 @@ describe('getAllActiveModelsBySymbol', () => {
         mockAxios.get.mockRejectedValue(error);
         mockAxios.isAxiosError.mockReturnValue(false);
 
-        await expect(
-            getAllActiveModelsBySymbol('BTC')
-        ).rejects.toThrow('Unknown');
+        await expect(getAllActiveModelsBySymbol('BTC')).rejects.toThrow(
+            'Unknown'
+        );
     });
 });

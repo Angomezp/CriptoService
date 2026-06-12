@@ -26,16 +26,16 @@ describe('getModels', () => {
         const models = [
             {
                 id: 1,
-                symbol: 'BTC'
+                symbol: 'BTC',
             },
             {
                 id: 2,
-                symbol: 'ETH'
-            }
+                symbol: 'ETH',
+            },
         ];
 
         mockAxios.get.mockResolvedValue({
-            data: models
+            data: models,
         });
 
         const result = await getModels();
@@ -50,19 +50,17 @@ describe('getModels', () => {
             response: {
                 status: 500,
                 data: {
-                    detail: 'Service unavailable'
-                }
-            }
+                    detail: 'Service unavailable',
+                },
+            },
         });
 
         mockAxios.isAxiosError.mockReturnValue(true);
 
-        await expect(
-            getModels()
-        ).rejects.toMatchObject({
+        await expect(getModels()).rejects.toMatchObject({
             code: 'ML_SERVICE_ERROR',
             statusCode: 500,
-            message: 'Service unavailable'
+            message: 'Service unavailable',
         });
     });
 
@@ -73,8 +71,6 @@ describe('getModels', () => {
 
         mockAxios.isAxiosError.mockReturnValue(false);
 
-        await expect(
-            getModels()
-        ).rejects.toThrow('Unknown');
+        await expect(getModels()).rejects.toThrow('Unknown');
     });
 });

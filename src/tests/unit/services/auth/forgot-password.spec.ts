@@ -46,13 +46,10 @@ describe('AuthService - solicitarRecuperacion', () => {
     it('should return generic message when user does not exist', async () => {
         mockUserRepo.findByEmail.mockResolvedValue(null);
 
-        const result = await authService.solicitarRecuperacion(
-            'noexiste@test.com'
-        );
+        const result =
+            await authService.solicitarRecuperacion('noexiste@test.com');
 
-        expect(result.message).toContain(
-            'Si el correo está registrado'
-        );
+        expect(result.message).toContain('Si el correo está registrado');
     });
 
     it('should create reset token and send email', async () => {
@@ -74,9 +71,7 @@ describe('AuthService - solicitarRecuperacion', () => {
             validUser.correo
         );
 
-        expect(result.message).toContain(
-            'Si el correo está registrado'
-        );
+        expect(result.message).toContain('Si el correo está registrado');
 
         expect(hashear).toHaveBeenCalled();
 
@@ -108,15 +103,11 @@ describe('AuthService - solicitarRecuperacion', () => {
             validUser.correo
         );
 
-        expect(result.message).toContain(
-            'Si el correo está registrado'
-        );
+        expect(result.message).toContain('Si el correo está registrado');
     });
 
     it('should throw FORGOT_PASSWORD_ERROR when repository fails', async () => {
-        mockUserRepo.findByEmail.mockRejectedValue(
-            new Error('Database error')
-        );
+        mockUserRepo.findByEmail.mockRejectedValue(new Error('Database error'));
 
         await expect(
             authService.solicitarRecuperacion(validUser.correo)
@@ -134,9 +125,7 @@ describe('AuthService - solicitarRecuperacion', () => {
             idToken: 1,
         });
 
-        mockTokenRepo.save.mockRejectedValue(
-            new Error('Save error')
-        );
+        mockTokenRepo.save.mockRejectedValue(new Error('Save error'));
 
         await expect(
             authService.solicitarRecuperacion(validUser.correo)
@@ -148,9 +137,7 @@ describe('AuthService - solicitarRecuperacion', () => {
     it('should throw FORGOT_PASSWORD_ERROR when hashing fails', async () => {
         mockUserRepo.findByEmail.mockResolvedValue(validUser);
 
-        vi.mocked(hashear).mockRejectedValue(
-            new Error('Hash error')
-        );
+        vi.mocked(hashear).mockRejectedValue(new Error('Hash error'));
 
         await expect(
             authService.solicitarRecuperacion(validUser.correo)

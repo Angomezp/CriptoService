@@ -39,9 +39,7 @@ describe('getModelById', () => {
     });
 
     it('should throw ValidationError when id is invalid', async () => {
-        await expect(
-            getModelById(0)
-        ).rejects.toMatchObject({
+        await expect(getModelById(0)).rejects.toMatchObject({
             message: 'Invalid model ID',
         });
 
@@ -49,9 +47,7 @@ describe('getModelById', () => {
     });
 
     it('should throw ValidationError when id is negative', async () => {
-        await expect(
-            getModelById(-1)
-        ).rejects.toMatchObject({
+        await expect(getModelById(-1)).rejects.toMatchObject({
             message: 'Invalid model ID',
         });
 
@@ -59,9 +55,7 @@ describe('getModelById', () => {
     });
 
     it('should throw ValidationError when id is not integer', async () => {
-        await expect(
-            getModelById(1.5)
-        ).rejects.toMatchObject({
+        await expect(getModelById(1.5)).rejects.toMatchObject({
             message: 'Invalid model ID',
         });
 
@@ -80,9 +74,7 @@ describe('getModelById', () => {
 
         mockAxios.isAxiosError.mockReturnValue(true);
 
-        await expect(
-            getModelById(999)
-        ).rejects.toMatchObject({
+        await expect(getModelById(999)).rejects.toMatchObject({
             code: 'ML_SERVICE_ERROR',
             statusCode: 404,
         });
@@ -95,8 +87,6 @@ describe('getModelById', () => {
 
         mockAxios.isAxiosError.mockReturnValue(false);
 
-        await expect(
-            getModelById(1)
-        ).rejects.toThrow('Unknown');
+        await expect(getModelById(1)).rejects.toThrow('Unknown');
     });
 });

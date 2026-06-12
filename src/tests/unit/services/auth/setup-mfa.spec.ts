@@ -47,13 +47,9 @@ describe('AuthService - setupMfa', () => {
 
         mockUserRepo.findById.mockResolvedValue(validUser);
 
-        vi.mocked(totpHandler.generarSecret).mockReturnValue(
-            'totp-secret'
-        );
+        vi.mocked(totpHandler.generarSecret).mockReturnValue('totp-secret');
 
-        vi.mocked(encryptionHandler.cifrar).mockReturnValue(
-            'encrypted-secret'
-        );
+        vi.mocked(encryptionHandler.cifrar).mockReturnValue('encrypted-secret');
 
         vi.mocked(totpHandler.generarUriTOTP).mockReturnValue(
             'otpauth://totp/test'
@@ -95,9 +91,7 @@ describe('AuthService - setupMfa', () => {
 
         mockUserRepo.findById.mockResolvedValue(null);
 
-        await expect(
-            authService.setupMfa('jwt-token')
-        ).rejects.toMatchObject({
+        await expect(authService.setupMfa('jwt-token')).rejects.toMatchObject({
             code: 'USER_NOT_FOUND',
         });
     });
@@ -107,12 +101,8 @@ describe('AuthService - setupMfa', () => {
             userId: validUser.idUsuario,
         } as any);
 
-        mockUserRepo.findById.mockRejectedValue(
-            new Error('Database error')
-        );
+        mockUserRepo.findById.mockRejectedValue(new Error('Database error'));
 
-        await expect(
-            authService.setupMfa('jwt-token')
-        ).rejects.toThrow();
+        await expect(authService.setupMfa('jwt-token')).rejects.toThrow();
     });
 });

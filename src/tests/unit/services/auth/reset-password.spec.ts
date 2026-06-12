@@ -82,11 +82,7 @@ describe('AuthService - restablecerPassword', () => {
         mockTokenRepo.findOne.mockResolvedValue(null);
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'token',
-                'Password123!'
-            )
+            authService.restablecerPassword(1, 'token', 'Password123!')
         ).rejects.toMatchObject({
             code: 'INVALID_RESET_TOKEN',
         });
@@ -98,11 +94,7 @@ describe('AuthService - restablecerPassword', () => {
         });
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'token',
-                'Password123!'
-            )
+            authService.restablecerPassword(1, 'token', 'Password123!')
         ).rejects.toMatchObject({
             code: 'TOKEN_ALREADY_USED',
         });
@@ -115,11 +107,7 @@ describe('AuthService - restablecerPassword', () => {
         });
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'token',
-                'Password123!'
-            )
+            authService.restablecerPassword(1, 'token', 'Password123!')
         ).rejects.toMatchObject({
             code: 'TOKEN_EXPIRED',
         });
@@ -135,11 +123,7 @@ describe('AuthService - restablecerPassword', () => {
         vi.mocked(verificar).mockResolvedValue(false);
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'invalid-token',
-                'Password123!'
-            )
+            authService.restablecerPassword(1, 'invalid-token', 'Password123!')
         ).rejects.toMatchObject({
             code: 'INVALID_RESET_TOKEN',
         });
@@ -156,27 +140,17 @@ describe('AuthService - restablecerPassword', () => {
         vi.mocked(verificar).mockResolvedValue(true);
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'token',
-                '123'
-            )
+            authService.restablecerPassword(1, 'token', '123')
         ).rejects.toMatchObject({
             code: 'VALIDATION_ERROR',
         });
     });
 
     it('should throw RESET_PASSWORD_ERROR when repository fails', async () => {
-        mockTokenRepo.findOne.mockRejectedValue(
-            new Error('Database error')
-        );
+        mockTokenRepo.findOne.mockRejectedValue(new Error('Database error'));
 
         await expect(
-            authService.restablecerPassword(
-                1,
-                'token',
-                'Password123!'
-            )
+            authService.restablecerPassword(1, 'token', 'Password123!')
         ).rejects.toMatchObject({
             code: 'RESET_PASSWORD_ERROR',
         });
@@ -203,11 +177,7 @@ describe('AuthService - restablecerPassword', () => {
 
         mockTokenRepo.save.mockResolvedValue(undefined);
 
-        await authService.restablecerPassword(
-            1,
-            'token',
-            'Password123!'
-        );
+        await authService.restablecerPassword(1, 'token', 'Password123!');
 
         expect(registro.usado).toBe(true);
     });

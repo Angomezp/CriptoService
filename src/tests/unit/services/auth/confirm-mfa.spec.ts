@@ -13,19 +13,19 @@ vi.mock('../../../../security/jwt.handler.js', () => ({
     generarToken: vi.fn(),
     generarMfaToken: vi.fn(),
     verificarToken: vi.fn(),
-    verificarMfaToken: vi.fn()
+    verificarMfaToken: vi.fn(),
 }));
 
 vi.mock('../../../../security/encryption.js', () => ({
     cifrar: vi.fn(),
-    descifrar: vi.fn()
+    descifrar: vi.fn(),
 }));
 
 vi.mock('../../../../security/totp.handler.js', () => ({
     generarSecret: vi.fn(),
     generarUriTOTP: vi.fn(),
     generarCodigoQR: vi.fn(),
-    verificarTokenTOTP: vi.fn()
+    verificarTokenTOTP: vi.fn(),
 }));
 
 vi.mock('../../../../services/mailer.service.js', () => ({
@@ -34,8 +34,7 @@ vi.mock('../../../../services/mailer.service.js', () => ({
 }));
 
 beforeEach(() => {
-    vi.mocked(mailerService.enviarAlertaBloqueo)
-        .mockResolvedValue(undefined);
+    vi.mocked(mailerService.enviarAlertaBloqueo).mockResolvedValue(undefined);
 });
 describe('AuthService - confirmMfa', () => {
     let authService: AuthService;
@@ -51,11 +50,11 @@ describe('AuthService - confirmMfa', () => {
         const user = {
             idUsuario: 1,
             correo: 'angel@test.com',
-            totpSecret: 'encrypted-secret'
+            totpSecret: 'encrypted-secret',
         };
 
         vi.mocked(jwtHandler.verificarToken).mockReturnValue({
-            userId: 1
+            userId: 1,
         } as any);
 
         mockUserRepo.findById.mockResolvedValue(user);
@@ -64,20 +63,13 @@ describe('AuthService - confirmMfa', () => {
             'decrypted-secret'
         );
 
-        vi.mocked(totpHandler.verificarTokenTOTP).mockResolvedValue(
-            true
-        );
+        vi.mocked(totpHandler.verificarTokenTOTP).mockResolvedValue(true);
 
         mockUserRepo.updateMfaSecret.mockResolvedValue(undefined);
 
-        await authService.confirmMfa(
-            'jwt-token',
-            '123456'
-        );
+        await authService.confirmMfa('jwt-token', '123456');
 
-        expect(
-            mockUserRepo.updateMfaSecret
-        ).toHaveBeenCalledWith(
+        expect(mockUserRepo.updateMfaSecret).toHaveBeenCalledWith(
             user.idUsuario,
             user.totpSecret,
             true
@@ -85,101 +77,80 @@ describe('AuthService - confirmMfa', () => {
     });
 
     it('should throw INVALID_TOKEN when JWT is invalid', async () => {
-        vi.mocked(jwtHandler.verificarToken).mockReturnValue(
-            null as any
-        );
+        vi.mocked(jwtHandler.verificarToken).mockReturnValue(null as any);
 
         await expect(
-            authService.confirmMfa(
-                'invalid-token',
-                '123456'
-            )
+            authService.confirmMfa('invalid-token', '123456')
         ).rejects.toMatchObject({
-            code: 'INVALID_TOKEN'
+            code: 'INVALID_TOKEN',
         });
     });
 
     it('should throw USER_NOT_FOUND when user does not exist', async () => {
         vi.mocked(jwtHandler.verificarToken).mockReturnValue({
-            userId: 1
+            userId: 1,
         } as any);
 
         mockUserRepo.findById.mockResolvedValue(null);
 
         await expect(
-            authService.confirmMfa(
-                'jwt-token',
-                '123456'
-            )
+            authService.confirmMfa('jwt-token', '123456')
         ).rejects.toMatchObject({
-            code: 'USER_NOT_FOUND'
+            code: 'USER_NOT_FOUND',
         });
     });
 
     it('should throw MFA_NOT_CONFIGURED when user has no secret', async () => {
         vi.mocked(jwtHandler.verificarToken).mockReturnValue({
-            userId: 1
+            userId: 1,
         } as any);
 
         mockUserRepo.findById.mockResolvedValue({
             idUsuario: 1,
             correo: 'angel@test.com',
-            totpSecret: null
+            totpSecret: null,
         });
 
         await expect(
-            authService.confirmMfa(
-                'jwt-token',
-                '123456'
-            )
+            authService.confirmMfa('jwt-token', '123456')
         ).rejects.toMatchObject({
-            code: 'MFA_NOT_CONFIGURED'
+            code: 'MFA_NOT_CONFIGURED',
         });
     });
 
     it('should throw INVALID_MFA_CODE when TOTP code is invalid', async () => {
         vi.mocked(jwtHandler.verificarToken).mockReturnValue({
-            userId: 1
+            userId: 1,
         } as any);
 
         mockUserRepo.findById.mockResolvedValue({
             idUsuario: 1,
             correo: 'angel@test.com',
-            totpSecret: 'encrypted-secret'
+            totpSecret: 'encrypted-secret',
         });
 
         vi.mocked(encryptionHandler.descifrar).mockReturnValue(
             'decrypted-secret'
         );
 
-        vi.mocked(totpHandler.verificarTokenTOTP).mockResolvedValue(
-            false
-        );
+        vi.mocked(totpHandler.verificarTokenTOTP).mockResolvedValue(false);
 
         await expect(
-            authService.confirmMfa(
-                'jwt-token',
-                '123456'
-            )
+            authService.confirmMfa('jwt-token', '123456')
         ).rejects.toMatchObject({
-            code: 'INVALID_MFA_CODE'
+            code: 'INVALID_MFA_CODE',
         });
     });
 
     it('should propagate repository errors', async () => {
         vi.mocked(jwtHandler.verificarToken).mockReturnValue({
-            userId: 1
+            userId: 1,
         } as any);
 
-        mockUserRepo.findById.mockRejectedValue(
-            new Error('Database error')
-        );
+        mockUserRepo.findById.mockRejectedValue(new Error('Database error'));
 
         await expect(
-            authService.confirmMfa(
-                'jwt-token',
-                '123456'
-            )
+            authService.confirmMfa('jwt-token', '123456')
         ).rejects.toThrow('Database error');
     });
 });

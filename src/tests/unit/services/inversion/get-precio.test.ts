@@ -20,9 +20,7 @@ describe('InversionService - getPrecio', () => {
             }),
         } as Response);
 
-        const result = await inversionService.getPrecio(
-            'bitcoin'
-        );
+        const result = await inversionService.getPrecio('bitcoin');
 
         expect(result).toBe(65000);
 
@@ -42,13 +40,11 @@ describe('InversionService - getPrecio', () => {
     });
 
     it('should propagate fetch error', async () => {
-        global.fetch = vi.fn().mockRejectedValue(
-            new Error('Network error')
-        );
+        global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-        await expect(
-            inversionService.getPrecio('bitcoin')
-        ).rejects.toThrow('Network error');
+        await expect(inversionService.getPrecio('bitcoin')).rejects.toThrow(
+            'Network error'
+        );
     });
 
     it('should propagate json parsing error', async () => {
@@ -58,8 +54,8 @@ describe('InversionService - getPrecio', () => {
             },
         } as unknown as Response);
 
-        await expect(
-            inversionService.getPrecio('bitcoin')
-        ).rejects.toThrow('Invalid JSON');
+        await expect(inversionService.getPrecio('bitcoin')).rejects.toThrow(
+            'Invalid JSON'
+        );
     });
 });

@@ -25,11 +25,9 @@ vi.mock('../../../../repositories/inversion.repository.js', () => ({
 
 vi.mock('../../../../repositories/portafolio.repository.js', () => ({
     default: class {
-        findIdByUserAndName =
-            mockPortafolioRepo.findIdByUserAndName;
+        findIdByUserAndName = mockPortafolioRepo.findIdByUserAndName;
 
-        existsByUserAndName =
-            mockPortafolioRepo.existsByUserAndName;
+        existsByUserAndName = mockPortafolioRepo.existsByUserAndName;
     },
 }));
 
@@ -53,13 +51,9 @@ describe('InversionService - getInversiones', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(
-            true
-        );
+        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(true);
 
-        mockInversionRepo.findByPortafolio.mockResolvedValue([
-            validInversion,
-        ]);
+        mockInversionRepo.findByPortafolio.mockResolvedValue([validInversion]);
 
         const result = await inversionService.getInversiones(
             'Principal',
@@ -68,9 +62,7 @@ describe('InversionService - getInversiones', () => {
 
         expect(result).toEqual([validInversion]);
 
-        expect(
-            mockInversionRepo.findByPortafolio
-        ).toHaveBeenCalledWith(1);
+        expect(mockInversionRepo.findByPortafolio).toHaveBeenCalledWith(1);
     });
 
     it('should throw PORTAFOLIO_NOT_FOUND when portfolio does not exist', async () => {
@@ -78,15 +70,10 @@ describe('InversionService - getInversiones', () => {
             validJwtPayload as any
         );
 
-        mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(
-            null
-        );
+        mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(null);
 
         await expect(
-            inversionService.getInversiones(
-                'Principal',
-                'jwt-token'
-            )
+            inversionService.getInversiones('Principal', 'jwt-token')
         ).rejects.toMatchObject({
             code: 'PORTAFOLIO_NOT_FOUND',
         });
@@ -99,15 +86,10 @@ describe('InversionService - getInversiones', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(
-            false
-        );
+        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(false);
 
         await expect(
-            inversionService.getInversiones(
-                'Principal',
-                'jwt-token'
-            )
+            inversionService.getInversiones('Principal', 'jwt-token')
         ).rejects.toMatchObject({
             code: 'FORBIDDEN',
         });
@@ -120,19 +102,14 @@ describe('InversionService - getInversiones', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(
-            true
-        );
+        mockPortafolioRepo.existsByUserAndName.mockResolvedValue(true);
 
         mockInversionRepo.findByPortafolio.mockRejectedValue(
             new Error('Database error')
         );
 
         await expect(
-            inversionService.getInversiones(
-                'Principal',
-                'jwt-token'
-            )
+            inversionService.getInversiones('Principal', 'jwt-token')
         ).rejects.toThrow('Database error');
     });
 });

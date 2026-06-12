@@ -37,15 +37,13 @@ describe('getModelBySymbol', () => {
         expect(result).toEqual(model);
 
         expect(mockAxios.get).toHaveBeenCalledTimes(1);
-        expect(mockAxios.get.mock.calls[0][0]).toContain(
-            '/models/symbol/BTC'
-        );
+        expect(mockAxios.get.mock.calls[0][0]).toContain('/models/symbol/BTC');
     });
 
     it('should throw ValidationError when symbol is empty', async () => {
-        await expect(
-            getModelBySymbol('')
-        ).rejects.toThrow('Symbol is required');
+        await expect(getModelBySymbol('')).rejects.toThrow(
+            'Symbol is required'
+        );
     });
 
     it('should throw ML_SERVICE_ERROR on axios error', async () => {
@@ -60,9 +58,7 @@ describe('getModelBySymbol', () => {
 
         mockAxios.isAxiosError.mockReturnValue(true);
 
-        await expect(
-            getModelBySymbol('BTC')
-        ).rejects.toMatchObject({
+        await expect(getModelBySymbol('BTC')).rejects.toMatchObject({
             code: 'ML_SERVICE_ERROR',
             statusCode: 404,
         });
@@ -75,8 +71,6 @@ describe('getModelBySymbol', () => {
 
         mockAxios.isAxiosError.mockReturnValue(false);
 
-        await expect(
-            getModelBySymbol('BTC')
-        ).rejects.toThrow('Unknown');
+        await expect(getModelBySymbol('BTC')).rejects.toThrow('Unknown');
     });
 });

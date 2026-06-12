@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { resetNodemailerMocks, transporter } from '../../mocks/nodemailer.mocks.js';
+import {
+    resetNodemailerMocks,
+    transporter,
+} from '../../mocks/nodemailer.mocks.js';
 import {
     enviarCorreoRecuperacion,
     enviarAlertaBloqueo,
@@ -19,7 +22,9 @@ describe('Mailer Service', () => {
         await enviarCorreoRecuperacion(destino, link);
 
         expect(transporter.sendMail).toHaveBeenCalledTimes(1);
-        const mailArgs = ((transporter.sendMail.mock.calls as any[])[0][0]) as any;
+        const mailArgs = (
+            transporter.sendMail.mock.calls as any[]
+        )[0][0] as any;
         expect(mailArgs.to).toBe(destino);
         expect(mailArgs.subject).toContain('Recupera tu contraseña');
         expect(mailArgs.text).toContain(link);
@@ -34,7 +39,9 @@ describe('Mailer Service', () => {
         await enviarAlertaBloqueo(destino, minutos, appUrl);
 
         expect(transporter.sendMail).toHaveBeenCalledTimes(1);
-        const mailArgs = ((transporter.sendMail.mock.calls as any[])[0][0]) as any;
+        const mailArgs = (
+            transporter.sendMail.mock.calls as any[]
+        )[0][0] as any;
         expect(mailArgs.to).toBe(destino);
         expect(mailArgs.subject).toContain('Alerta de seguridad');
         expect(mailArgs.text).toContain(appUrl + '/forgot-password');

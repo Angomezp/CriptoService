@@ -25,11 +25,9 @@ vi.mock('../../../../repositories/inversion.repository.js', () => ({
 
 vi.mock('../../../../repositories/portafolio.repository.js', () => ({
     default: class {
-        findIdByUserAndName =
-            mockPortafolioRepo.findIdByUserAndName;
+        findIdByUserAndName = mockPortafolioRepo.findIdByUserAndName;
 
-        existsByUserAndName =
-            mockPortafolioRepo.existsByUserAndName;
+        existsByUserAndName = mockPortafolioRepo.existsByUserAndName;
     },
 }));
 
@@ -51,26 +49,17 @@ describe('InversionService - getInversionById', () => {
             validJwtPayload as any
         );
 
-        mockInversionRepo.findById.mockResolvedValue(
-            validInversion
-        );
+        mockInversionRepo.findById.mockResolvedValue(validInversion);
 
-        mockInversionRepo.existsByIdAndUser.mockResolvedValue(
-            true
-        );
+        mockInversionRepo.existsByIdAndUser.mockResolvedValue(true);
 
-        const result = await inversionService.getInversionById(
-            1,
-            'jwt-token'
-        );
+        const result = await inversionService.getInversionById(1, 'jwt-token');
 
         expect(result).toEqual(validInversion);
 
         expect(mockInversionRepo.findById).toHaveBeenCalledWith(1);
 
-        expect(
-            mockInversionRepo.existsByIdAndUser
-        ).toHaveBeenCalledWith(
+        expect(mockInversionRepo.existsByIdAndUser).toHaveBeenCalledWith(
             1,
             validJwtPayload.userId
         );
@@ -84,10 +73,7 @@ describe('InversionService - getInversionById', () => {
         mockInversionRepo.findById.mockResolvedValue(null);
 
         await expect(
-            inversionService.getInversionById(
-                1,
-                'jwt-token'
-            )
+            inversionService.getInversionById(1, 'jwt-token')
         ).rejects.toMatchObject({
             code: 'INVERSION_NOT_FOUND',
         });
@@ -98,19 +84,12 @@ describe('InversionService - getInversionById', () => {
             validJwtPayload as any
         );
 
-        mockInversionRepo.findById.mockResolvedValue(
-            validInversion
-        );
+        mockInversionRepo.findById.mockResolvedValue(validInversion);
 
-        mockInversionRepo.existsByIdAndUser.mockResolvedValue(
-            false
-        );
+        mockInversionRepo.existsByIdAndUser.mockResolvedValue(false);
 
         await expect(
-            inversionService.getInversionById(
-                1,
-                'jwt-token'
-            )
+            inversionService.getInversionById(1, 'jwt-token')
         ).rejects.toMatchObject({
             code: 'FORBIDDEN',
         });
@@ -126,10 +105,7 @@ describe('InversionService - getInversionById', () => {
         );
 
         await expect(
-            inversionService.getInversionById(
-                1,
-                'jwt-token'
-            )
+            inversionService.getInversionById(1, 'jwt-token')
         ).rejects.toThrow('Database error');
     });
 
@@ -138,19 +114,14 @@ describe('InversionService - getInversionById', () => {
             validJwtPayload as any
         );
 
-        mockInversionRepo.findById.mockResolvedValue(
-            validInversion
-        );
+        mockInversionRepo.findById.mockResolvedValue(validInversion);
 
         mockInversionRepo.existsByIdAndUser.mockRejectedValue(
             new Error('Database error')
         );
 
         await expect(
-            inversionService.getInversionById(
-                1,
-                'jwt-token'
-            )
+            inversionService.getInversionById(1, 'jwt-token')
         ).rejects.toThrow('Database error');
     });
 });

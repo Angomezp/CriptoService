@@ -28,11 +28,9 @@ vi.mock('../../../../repositories/inversion.repository.js', () => {
 vi.mock('../../../../repositories/portafolio.repository.js', () => {
     return {
         default: class {
-            findIdByUserAndName =
-                mockPortafolioRepo.findIdByUserAndName;
+            findIdByUserAndName = mockPortafolioRepo.findIdByUserAndName;
 
-            existsByUserAndName =
-                mockPortafolioRepo.existsByUserAndName;
+            existsByUserAndName = mockPortafolioRepo.existsByUserAndName;
         },
     };
 });
@@ -57,14 +55,11 @@ describe('InversionService - createInversion', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        vi.spyOn(
-            inversionService,
-            'calcularCostoInicial'
-        ).mockResolvedValue(120000);
-
-        mockInversionRepo.saveInversion.mockResolvedValue(
-            validInversion
+        vi.spyOn(inversionService, 'calcularCostoInicial').mockResolvedValue(
+            120000
         );
+
+        mockInversionRepo.saveInversion.mockResolvedValue(validInversion);
 
         const result = await inversionService.createInversion(
             'Principal',
@@ -75,16 +70,12 @@ describe('InversionService - createInversion', () => {
 
         expect(result).toEqual(validInversion);
 
-        expect(
-            mockPortafolioRepo.findIdByUserAndName
-        ).toHaveBeenCalledWith(
+        expect(mockPortafolioRepo.findIdByUserAndName).toHaveBeenCalledWith(
             validJwtPayload.userId,
             'Principal'
         );
 
-        expect(
-            mockInversionRepo.saveInversion
-        ).toHaveBeenCalledWith(
+        expect(mockInversionRepo.saveInversion).toHaveBeenCalledWith(
             1,
             'bitcoin',
             2,
@@ -97,17 +88,10 @@ describe('InversionService - createInversion', () => {
             validJwtPayload as any
         );
 
-        mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(
-            null
-        );
+        mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(null);
 
         await expect(
-            inversionService.createInversion(
-                'Principal',
-                'BTC',
-                2,
-                'jwt-token'
-            )
+            inversionService.createInversion('Principal', 'BTC', 2, 'jwt-token')
         ).rejects.toMatchObject({
             code: 'PORTAFOLIO_NOT_FOUND',
         });
@@ -120,20 +104,12 @@ describe('InversionService - createInversion', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        vi.spyOn(
-            inversionService,
-            'calcularCostoInicial'
-        ).mockRejectedValue(
+        vi.spyOn(inversionService, 'calcularCostoInicial').mockRejectedValue(
             new Error('CoinGecko unavailable')
         );
 
         await expect(
-            inversionService.createInversion(
-                'Principal',
-                'BTC',
-                2,
-                'jwt-token'
-            )
+            inversionService.createInversion('Principal', 'BTC', 2, 'jwt-token')
         ).rejects.toThrow('CoinGecko unavailable');
     });
 
@@ -144,22 +120,16 @@ describe('InversionService - createInversion', () => {
 
         mockPortafolioRepo.findIdByUserAndName.mockResolvedValue(1);
 
-        vi.spyOn(
-            inversionService,
-            'calcularCostoInicial'
-        ).mockResolvedValue(120000);
+        vi.spyOn(inversionService, 'calcularCostoInicial').mockResolvedValue(
+            120000
+        );
 
         mockInversionRepo.saveInversion.mockRejectedValue(
             new Error('Database error')
         );
 
         await expect(
-            inversionService.createInversion(
-                'Principal',
-                'BTC',
-                2,
-                'jwt-token'
-            )
+            inversionService.createInversion('Principal', 'BTC', 2, 'jwt-token')
         ).rejects.toThrow('Database error');
     });
 });

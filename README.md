@@ -5,6 +5,7 @@
 Pequeña API en TypeScript (Node.js) que consume un servicio ML (Python) para obtener predicciones, y expone endpoints para autenticación, inversiones y predicciones.
 
 ## Tecnologías
+
 - Node.js + TypeScript
 - Express
 - Axios (para integraciones con el servicio ML)
@@ -14,6 +15,7 @@ Pequeña API en TypeScript (Node.js) que consume un servicio ML (Python) para ob
 - Vitest para tests
 
 ## Requisitos
+
 - Node.js 18+ (o versión compatible)
 - Python 3.8+ (si vas a ejecutar el microservicio `ml_service` localmente)
 - Postgres si vas a levantar la base de datos
@@ -72,26 +74,25 @@ npm run ml_service_docs     # Genera docs del microservicio ML
 Resumen de carpetas y archivos importantes:
 
 - `src/` — aplicación TypeScript (API server). Estructura principal:
-  - `controllers/` — controladores HTTP
-  - `services/` — lógica de negocio (envío de correos, integración con ML, autenticación, etc.)
-  - `repositories/` — acceso a datos (Postgres/TypeORM)
-  - `routes/` — definición de rutas/endpoint
-  - `dtos/`, `entities/`, `mappers/` — modelos y mapeos
-  - `security/` — utilidades de cifrado, JWT, TOTP
-  - `handlers/` — middleware/handlers (errores, autenticación)
-  - `tests/` — tests unitarios del backend (`src/tests/unit`, `src/tests/integration`)
+    - `controllers/` — controladores HTTP
+    - `services/` — lógica de negocio (envío de correos, integración con ML, autenticación, etc.)
+    - `repositories/` — acceso a datos (Postgres/TypeORM)
+    - `routes/` — definición de rutas/endpoint
+    - `dtos/`, `entities/`, `mappers/` — modelos y mapeos
+    - `security/` — utilidades de cifrado, JWT, TOTP
+    - `handlers/` — middleware/handlers (errores, autenticación)
+    - `tests/` — tests unitarios del backend (`src/tests/unit`, `src/tests/integration`)
 
 - `ml_service/` — microservicio Python que sirve el modelo ML y endpoints de predicción:
-  - `main.py` — arranque del servicio
-  - `api/` — controllers/serializers y documentación OpenAPI
-  - `models/` — lugar donde se guardan los modelos serializados (`.joblib`)
-
+    - `main.py` — arranque del servicio
+    - `api/` — controllers/serializers y documentación OpenAPI
+    - `models/` — lugar donde se guardan los modelos serializados (`.joblib`)
 
 - `docs/` — documentación del proyecto:
-  - `api/` — especificaciones OpenAPI y documentación de la API
-  - `api_ml_service/` — documentación específica del microservicio ML
-  - `arquitectura/` — notas sobre la arquitectura
-  - `base_de_datos/` — diccionario y scripts de base de datos
+    - `api/` — especificaciones OpenAPI y documentación de la API
+    - `api_ml_service/` — documentación específica del microservicio ML
+    - `arquitectura/` — notas sobre la arquitectura
+    - `base_de_datos/` — diccionario y scripts de base de datos
 
 - `config/`, `src/config/` — utilidades y carga de variables de entorno
 - `tests/` — carpeta raíz con pruebas adicionales (si aplica)
@@ -99,4 +100,5 @@ Resumen de carpetas y archivos importantes:
 Ejecuta `npm run test` para correr la suite completa (Vitest).
 
 ## Notas
+
 - Los tests unitarios usan mocks para `axios` y `nodemailer`; ver `src/tests/unit/mocks/`.

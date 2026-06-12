@@ -48,35 +48,23 @@ describe('PortafolioService - createPortafolio', () => {
 
         mockUserRepo.findById.mockResolvedValue(validUser);
 
-        mockPortafolioRepo.savePortafolio.mockResolvedValue(
-            validPortafolio
-        );
+        mockPortafolioRepo.savePortafolio.mockResolvedValue(validPortafolio);
 
-        const result = await service.createPortafolio(
-            'jwt-token',
-            'Principal'
-        );
+        const result = await service.createPortafolio('jwt-token', 'Principal');
 
         expect(result).toEqual(validPortafolio);
 
-        expect(
-            mockPortafolioRepo.savePortafolio
-        ).toHaveBeenCalledWith(
+        expect(mockPortafolioRepo.savePortafolio).toHaveBeenCalledWith(
             validJwtPayload.userId,
             'Principal'
         );
     });
 
     it('should throw INVALID_TOKEN', async () => {
-        vi.mocked(jwtHandler.verificarToken).mockReturnValue(
-            null as any
-        );
+        vi.mocked(jwtHandler.verificarToken).mockReturnValue(null as any);
 
         await expect(
-            service.createPortafolio(
-                'invalid-token',
-                'Principal'
-            )
+            service.createPortafolio('invalid-token', 'Principal')
         ).rejects.toMatchObject({
             code: 'INVALID_TOKEN',
         });
@@ -90,10 +78,7 @@ describe('PortafolioService - createPortafolio', () => {
         mockUserRepo.findById.mockResolvedValue(null);
 
         await expect(
-            service.createPortafolio(
-                'jwt-token',
-                'Principal'
-            )
+            service.createPortafolio('jwt-token', 'Principal')
         ).rejects.toMatchObject({
             code: 'USER_NOT_FOUND',
         });
@@ -111,10 +96,7 @@ describe('PortafolioService - createPortafolio', () => {
         );
 
         await expect(
-            service.createPortafolio(
-                'jwt-token',
-                'Principal'
-            )
+            service.createPortafolio('jwt-token', 'Principal')
         ).rejects.toThrow('Database error');
     });
 });

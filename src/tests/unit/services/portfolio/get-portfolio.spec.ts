@@ -48,21 +48,15 @@ describe('PortafolioService - getPortafolios', () => {
 
         mockUserRepo.findById.mockResolvedValue(validUser);
 
-        mockPortafolioRepo.findAllByUserId.mockResolvedValue([
-            validPortafolio,
-        ]);
+        mockPortafolioRepo.findAllByUserId.mockResolvedValue([validPortafolio]);
 
-        const result = await service.getPortafolios(
-            'jwt-token'
-        );
+        const result = await service.getPortafolios('jwt-token');
 
         expect(result).toEqual([validPortafolio]);
     });
 
     it('should throw INVALID_TOKEN', async () => {
-        vi.mocked(jwtHandler.verificarToken).mockReturnValue(
-            null as any
-        );
+        vi.mocked(jwtHandler.verificarToken).mockReturnValue(null as any);
 
         await expect(
             service.getPortafolios('invalid-token')
@@ -78,11 +72,11 @@ describe('PortafolioService - getPortafolios', () => {
 
         mockUserRepo.findById.mockResolvedValue(null);
 
-        await expect(
-            service.getPortafolios('jwt-token')
-        ).rejects.toMatchObject({
-            code: 'USER_NOT_FOUND',
-        });
+        await expect(service.getPortafolios('jwt-token')).rejects.toMatchObject(
+            {
+                code: 'USER_NOT_FOUND',
+            }
+        );
     });
 
     it('should propagate repository errors', async () => {
@@ -96,8 +90,8 @@ describe('PortafolioService - getPortafolios', () => {
             new Error('Database error')
         );
 
-        await expect(
-            service.getPortafolios('jwt-token')
-        ).rejects.toThrow('Database error');
+        await expect(service.getPortafolios('jwt-token')).rejects.toThrow(
+            'Database error'
+        );
     });
 });
